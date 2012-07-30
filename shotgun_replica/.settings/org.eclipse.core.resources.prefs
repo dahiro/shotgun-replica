@@ -9,6 +9,7 @@ encoding//python/src/shotgun_replica/entity_manipulation.py=utf-8
 encoding//python/src/shotgun_replica/factories/__init__.py=utf-8
 encoding//python/src/shotgun_replica/sync/shotgun_to_local.py=utf-8
 encoding//python/src/shotgun_replica/sync/sync_settings.py=utf-8
+encoding//python/tests/shotgun_replica_tests/factories/test_factories.py=utf-8
 encoding//python/tests/shotgun_replica_tests/restAPI/test_stuff.py=utf-8
 encoding//python/tests/shotgun_replica_tests/sync/local_to_shotgun/test_change.py=utf-8
 encoding//python/tests/shotgun_replica_tests/sync/local_to_shotgun/test_create_delete.py=utf-8
@@ -16,5 +17,3 @@ encoding//python/tests/shotgun_replica_tests/sync/shotgun_to_local/test_change.p
 encoding//python/tests/shotgun_replica_tests/sync/shotgun_to_local/test_create_delete.py=utf-8
 encoding//python/tests/shotgun_replica_tests/sync/shotgun_to_local/test_link.py=utf-8
 encoding//python/tests/shotgun_replica_tests/sync/test_stuff.py=utf-8
-encoding//python/tests/shotgun_replica_tests/test_change.py=utf-8
-encoding//python/tests/shotgun_replica_tests/test_factories.py=utf-8

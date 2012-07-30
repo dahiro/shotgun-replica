@@ -16,22 +16,18 @@ def intOrNone( value ):
 
 class Handler( object ):
     def GET( self, entityType, localID, remoteID ):
-        entityClass = connectors.getClassOfType( entityType )
-        if not entityClass: raise web.notfound()
-
-        userData = web.input()
 
         if localID:
-            entity = factories.getObject( entityType,
-                                          remote_id = intOrNone( remoteID ),
-                                          local_id = intOrNone( localID ) )
+            entity = self._getEntity( entityType, localID, remoteID )
+
             if entity:
                 return entity.getShotgunDict()
             else:
                 return web.notfound()
         else:
-            #
-            #userData["queryfilter"].split("=")
+
+            userData = web.input()
+
             filters = []
             filterValues = []
             for attribute in userData.keys():
@@ -47,45 +43,53 @@ class Handler( object ):
             return json_entities
 
     def DELETE( self, entityType, localID, remoteID ):
-        entityClass = connectors.getClassOfType( entityType )
-        if not entityClass: raise web.notfound()
-
-        entity = factories.getObject( entityType,
-                                      remote_id = intOrNone( remoteID ),
-                                      local_id = intOrNone( localID ) )
+        entity = self._getEntity( entityType, localID, remoteID )
 
         if entity:
             return entity.delete()
         else:
             return web.notfound()
 
-    def POST( self, entityType, localID, remoteID ):
-        entityClass = connectors.getClassOfType( entityType )
-        if not entityClass: raise web.notfound()
-
-        userData = web.input()
-
-        data = json.loads( userData["data"] )
-        entity = entityClass()
-        entity.loadFromDict( data )
-        entity.save()
-
     def PUT( self, entityType, localID, remoteID ):
-        entityClass = connectors.getClassOfType( entityType )
-        if not entityClass: raise web.notfound()
-
-        entity = factories.getObject( entityType,
-                                      remote_id = intOrNone( remoteID ),
-                                      local_id = intOrNone( localID ) )
+        entity = self._getEntity( entityType, localID, remoteID )
 
         if not entity:
             return web.notfound()
 
-        userData = dict( urlparse.parse_qsl( web.data() ) )
-        newData = json.loads( userData["data"] )
+        newData = self._parseInput()
 
-        entity.loadFromDict( newData )
-        entity.save()
+        updateEntity( entity, newData )
+
+    def _getEntity( self, entityType, localID, remoteID ):
+        entityClass = connectors.getClassOfType( entityType )
+        if not entityClass:
+            raise web.notfound()
+
+        entity = factories.getObject( entityType,
+                                      remote_id = intOrNone( remoteID ),
+                                      local_id = intOrNone( localID ) )
+        return entity
+
+    def _parseInput( self ):
+        userData = dict( urlparse.parse_qsl( web.data() ) )
+        data = json.loads( userData["data"] )
+        return data
+
+    def POST( self, entityType, localID, remoteID ):
+        entityClass = connectors.getClassOfType( entityType )
+        if not entityClass: raise web.notfound()
+
+        data = self._parseInput()
+
+        createEntity( entityClass, data )
+
+def updateEntity( entity, dataDict ):
+    entity.loadFromDict( dataDict )
+    entity.save()
+
+def createEntity( entityClass, dataDict ):
+    entity = entityClass()
+    updateEntity( entity, dataDict )
 
 def startServer():
     urls = ( 

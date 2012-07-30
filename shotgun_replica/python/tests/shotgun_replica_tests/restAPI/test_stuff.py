@@ -10,9 +10,11 @@ from shotgun_api3.lib import httplib2
 import urllib
 import json
 import datetime
-from shotgun_replica import config
+from shotgun_replica import config, factories, entities
 import thread
 import time
+import logging
+from shotgun_replica_tests import testNodeID_1
 
 class Test( unittest.TestCase ):
 
@@ -48,7 +50,35 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "POST", params )
-        http.request
+        logging.debug(response)
+        logging.debug(content)
+
+    def testProjectUpdate( self ):
+
+        url = 'http://localhost:8080/Project/29'
+
+        userdict = config.getUserDict()
+        nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
+
+        projectData = {
+                       "sg_status": "Active",
+                       "sg_due": "2012-08-08",
+                       "updated_by": userdict,
+                       "updated_at": nowstr,
+                       }
+
+        putData = { 
+                   "data": json.dumps(projectData)
+                   }
+
+        params = urllib.urlencode( putData )
+
+        http = httplib2.Http()
+        http.add_credentials( 'username', 'password' )
+
+        response, content = http.request( url, "PUT", params )
+        logging.debug(response)
+        logging.debug(content)
 
 
     def testProjectUpdate( self ):
@@ -75,8 +105,18 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "PUT", params )
+        logging.debug(response)
+        logging.debug(content)
 
-
+    def testNodeVersionCreation(self):
+        node = factories.getObject("Node", remote_id = testNodeID_1)
+        
+        versionData = {
+                       entities.Version.code
+                       entities.Version.description
+                       entities.Version.entity
+                       entities.Version.sg_task
+                       }
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

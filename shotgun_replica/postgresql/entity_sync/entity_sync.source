@@ -1,0 +1,149 @@
+---------------------------------------------------------------------------
+--
+-- entity.sql-
+--    This file shows how to create a new user-defined type and how to
+--    use this new type.
+-- 
+--
+-- Portions Copyright (c) 1996-2009, PostgreSQL Global Development Group
+-- Portions Copyright (c) 1994, Regents of the University of California
+--
+-- $PostgreSQL: pgsql/src/tutorial/entity.source,v 1.23 2009/01/01 17:24:05 momjian Exp $
+--
+---------------------------------------------------------------------------
+
+
+CREATE TYPE entity_sync AS (
+    type   varchar,
+    id     integer,
+    remote_id integer
+);
+
+-----------------------------
+-- Using the new type:
+--  user-defined types can be used like ordinary built-in types.
+-----------------------------
+
+-- eg. we can use it in a table
+
+CREATE TABLE test_entity_sync (
+  a  entity_sync,
+  b  entity_sync
+);
+
+-- data for user-defined types are just strings in the proper textual
+-- representation. 
+
+INSERT INTO test_entity_sync VALUES ('(''Project'', 2, 3)', '(''Hans'', 3, -1 )');
+INSERT INTO test_entity_sync VALUES ('(''InOut'', -1, 51)', '(''CustomEntity02'', -1, 93)');
+
+SELECT * FROM test_entity_sync;
+
+
+
+CREATE OR REPLACE FUNCTION entity_sync_abs_lt(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION entity_sync_abs_le(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION entity_sync_abs_eq(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION entity_sync_abs_ne(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION entity_sync_abs_ge(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION entity_sync_abs_gt(entity_sync, entity_sync) RETURNS bool
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+
+-- create the support function too
+CREATE OR REPLACE FUNCTION entity_sync_abs_cmp(entity_sync, entity_sync) RETURNS int4
+   AS '_OBJWD_/entity_sync' LANGUAGE C IMMUTABLE STRICT;
+   
+SELECT entity_sync_abs_ne(('Project', 123, 2)::entity_sync, ('Project', 123, 3)::entity_sync);
+
+
+CREATE OPERATOR < (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_lt,
+   commutator = > , negator = >= ,
+   restrict = scalarltsel, join = scalarltjoinsel
+);
+CREATE OPERATOR <= (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_le,
+   commutator = >= , negator = > ,
+   restrict = scalarltsel, join = scalarltjoinsel
+);
+CREATE OPERATOR = (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_eq,
+   commutator = = ,
+   -- leave out negator since we didn't create <> operator
+   -- negator = <> ,
+   restrict = eqsel, join = eqjoinsel
+);
+CREATE OPERATOR <> (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_eq,
+   commutator = <> ,
+   negator = = ,
+   restrict = neqsel, join = neqjoinsel
+);
+CREATE OPERATOR >= (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_ge,
+   commutator = <= , negator = < ,
+   restrict = scalargtsel, join = scalargtjoinsel
+);
+CREATE OPERATOR > (
+   leftarg = entity_sync, rightarg = entity_sync, procedure = entity_sync_abs_gt,
+   commutator = < , negator = <= ,
+   restrict = scalargtsel, join = scalargtjoinsel
+);
+
+-- now we can make the operator class
+CREATE OPERATOR CLASS entity_sync_abs_ops
+    DEFAULT FOR TYPE entity_sync USING btree AS
+        OPERATOR        1       < ,
+        OPERATOR        2       <= ,
+        OPERATOR        3       = ,
+        OPERATOR        4       >= ,
+        OPERATOR        5       > ,
+        FUNCTION        1       entity_sync_abs_cmp(entity_sync, entity_sync);
+
+
+--DROP OPERATOR CLASS entity_sync_abs_ops USING btree;
+
+--DROP OPERATOR < (entity_sync, entity_sync);
+--DROP OPERATOR = (entity_sync, entity_sync);
+--DROP OPERATOR <= (entity_sync, entity_sync);
+--DROP OPERATOR > (entity_sync, entity_sync);
+--DROP OPERATOR >= (entity_sync, entity_sync);
+
+
+-- now, we can define a btree index on entity_sync types. First, let's populate
+-- the table. Note that postgres needs many more tuples to start using the
+-- btree index during selects.
+
+INSERT INTO test_entity_sync VALUES ('(''Project'', 2, 3)', '(''Hans'', 3, -1 )');
+INSERT INTO test_entity_sync VALUES ('(''InOut'', -1, 51)', '(''CustomEntity02'', -1, 93)');
+
+CREATE INDEX test_cplx_ind ON test_entity_sync
+   USING btree(a entity_sync_abs_ops);
+
+SELECT * from test_entity_sync where a = '(''InOut'', NULL, 51)';
+SELECT * from test_entity_sync where a < '(''InOut'', NULL, 51)';
+SELECT * from test_entity_sync where a > '(''InOut'', NULL, 51)';
+
+
+-- clean up the example
+DROP TABLE test_entity_sync;
+
+
+CREATE TABLE "ChangeEventsToShotgun" (
+    id SERIAL PRIMARY KEY,
+    processed boolean NOT NULL DEFAULT 'f',
+    created timestamp with time zone NOT NULL DEFAULT now(),
+    task varchar(20) NOT NULL,
+    corr_entity entity_sync,
+    changed_values text,
+    updated_by entity_sync,
+    change_first_in_db boolean NOT NULL DEFAULT 'f',
+    exception text
+);
+
+ALTER TABLE "ChangeEventsToShotgun" OWNER TO "shotgun_replica";

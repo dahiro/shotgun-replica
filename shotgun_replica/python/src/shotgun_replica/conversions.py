@@ -1,12 +1,12 @@
 
 from shotgun_replica import config
-from elefant import database
 
 import re
 import psycopg2
 from psycopg2.extensions import adapt, register_adapter, AsIs
 import json
 import logging
+import shotgun_replica
 
 con = None
 
@@ -212,10 +212,10 @@ class PostgresEntityType( object ):
         self.remote_id = remote_id
 
         if self.local_id == None:
-            self.local_id = database.UNKNOWN_SHOTGUN_ID
+            self.local_id = shotgun_replica.UNKNOWN_SHOTGUN_ID
 
         if self.remote_id == None:
-            self.remote_id = database.UNKNOWN_SHOTGUN_ID
+            self.remote_id = shotgun_replica.UNKNOWN_SHOTGUN_ID
 
     def __repr__( self ):
         return super( PostgresEntityType, self ).__repr__() + " %s (%d,%d)" % ( self.type,

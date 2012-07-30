@@ -9,7 +9,6 @@ import unittest
 from shotgun_replica.factories import getObject
 from shotgun_replica.entities import Task, Step, Project
 from tests_elefant import testTaskID
-from elefant.utilities.debug import debug
 
 class Test(unittest.TestCase):
 

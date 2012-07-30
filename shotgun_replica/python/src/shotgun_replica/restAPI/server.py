@@ -6,14 +6,7 @@ import web
 import json
 
 from shotgun_replica import connectors, factories
-import pprint
-import urllib
 import urlparse
-
-urls = ( 
-    '/(\w*)\/?(.+)?\/?(.+)?', 'Handler'
- )
-app = web.application( urls, globals() )
 
 def intOrNone( value ):
     if value == None:
@@ -94,5 +87,16 @@ class Handler( object ):
         entity.loadFromDict( newData )
         entity.save()
 
-if __name__ == "__main__":
+def startServer():
+    urls = ( 
+        '/(\w*)\/?(.+)?\/?(.+)?', 'Handler'
+    )
+    global app
+    app = web.application( urls, globals() )
     app.run()
+
+def stopServer():
+    app.stop()
+
+if __name__ == "__main__":
+    startServer()

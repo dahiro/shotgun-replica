@@ -6,6 +6,10 @@ import os
 eleconfig = config.Configuration()
 
 SHOTGUN_URL = eleconfig.get( config.CONF_SHOTGUN_URL )
+
+SHOTGUN_SYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_SYNC_SKRIPT )
+SHOTGUN_SYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_SYNC_KEY )
+
 SHOTGUN_BACKSYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_SKRIPT )
 SHOTGUN_BACKSYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_KEY )
 

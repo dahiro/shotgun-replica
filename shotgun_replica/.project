@@ -3,6 +3,7 @@
 	<name>shotgun_replica</name>
 	<comment></comment>
 	<projects>
+		<project>pl_pipeline</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

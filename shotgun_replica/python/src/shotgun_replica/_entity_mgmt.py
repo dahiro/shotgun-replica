@@ -2,10 +2,12 @@
 
 from shotgun_replica import entity_manipulation, conversions
 from shotgun_replica.conversions import PostgresEntityType
-from elefant import database
-import logging
+from shotgun_replica import base_entity 
 
-class _ShotgunEntity( object ):
+import logging
+import shotgun_replica
+
+class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
     _changed_values = []
 
     def __init__( self, *args, **kwargs ):
@@ -54,7 +56,7 @@ class _ShotgunEntity( object ):
         """
 
         remote_id = self.getRemoteID()
-        if remote_id == None or remote_id == database.UNKNOWN_SHOTGUN_ID:
+        if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
             return None
         else:
             return {'type': self.getType(),
@@ -119,7 +121,7 @@ class _ShotgunEntity( object ):
 
                 if type( fieldvalue ) == PostgresEntityType:
                     fieldvalue = fieldvalue.getSgObj()
-                elif isinstance( fieldvalue, _ShotgunEntity ):
+                elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                     fieldvalue = fieldvalue.getSgObj()
 
             elif fielddef["data_type"]["value"] == "multi_entity":
@@ -129,7 +131,7 @@ class _ShotgunEntity( object ):
 
                     if type( singleFieldvalue ) == PostgresEntityType:
                         storevalue.append( singleFieldvalue.getSgObj() )
-                    elif isinstance( fieldvalue, _ShotgunEntity ):
+                    elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                         storevalue.append( singleFieldvalue.getSgObj() )
                 fieldvalue = storevalue
 
@@ -196,7 +198,7 @@ class _ShotgunEntity( object ):
     def __cmp__( self, objB ):
         if objB == None:
             return -99999
-        if isinstance( objB, _ShotgunEntity ):
+        if isinstance( objB, base_entity.ShotgunBaseEntity ):
             if objB.getType() == self.getType():
                 return cmp( self.getID(), objB.getID() )
             else:
@@ -209,7 +211,7 @@ class _ShotgunEntity( object ):
 
             logging.debug( "changing localID: %s" % str( self.getLocalID() ) )
 
-            if self.getLocalID() == None or self.getLocalID() == database.UNKNOWN_SHOTGUN_ID:
+            if self.getLocalID() == None or self.getLocalID() == shotgun_replica.UNKNOWN_SHOTGUN_ID:
                 # insert entity in local database
                 entity_manipulation.createEntity( self )
             else:

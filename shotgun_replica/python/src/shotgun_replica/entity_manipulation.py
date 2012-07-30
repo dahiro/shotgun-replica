@@ -7,9 +7,9 @@ Created on Jun 20, 2012
 '''
 import datetime
 import json
-import elefant.database.connectors
 from shotgun_replica.conversions import PostgresEntityType, getPostgresUser
 import logging
+from shotgun_replica import connectors, base_entity
 
 def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
@@ -44,7 +44,7 @@ def createEntity( myObj ):
     """
 
 
-    src = elefant.database.connectors.DatabaseConnector()
+    src = connectors.DatabaseConnector()
     newID = src.add( myObj )
 
     object.__setattr__(myObj, "local_id", newID)
@@ -58,7 +58,7 @@ def changeEntity( myObj, changes ):
 
 #    myObj.reload()
 
-    src = elefant.database.connectors.DatabaseConnector()
+    src = connectors.DatabaseConnector()
     src.changeInDB( myObj, changes = changes )
 
     for ( key, value ) in changes.iteritems():
@@ -68,7 +68,7 @@ def changeEntity( myObj, changes ):
             changes[key] = float( value.days ) * 24 + float( value.seconds ) / 3600
         elif type( value ) == PostgresEntityType:
             changes[key] = value.getSgObj()
-        elif isinstance( value, elefant.database._entity_mgmt._ShotgunEntity ):
+        elif isinstance( value, base_entity.ShotgunBaseEntity ):
             changes[key] = value.getSgObj()
 
     _createChangeEvent( src, "change", 
@@ -81,7 +81,7 @@ def changeEntity( myObj, changes ):
 
 def deleteEntity( myObj ):
     """delete an entity in couchdb and shotgun"""
-    src = elefant.database.connectors.DatabaseConnector()
+    src = connectors.DatabaseConnector()
     src.delete(myObj)
     
     _createChangeEvent( src, "deletion", 

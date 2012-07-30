@@ -6,23 +6,27 @@ Created on Jun 27, 2012
 @author: bach
 '''
 from shotgun_replica.factories import getObject
-from tests_elefant import testProjectID
 from shotgun_replica.entities import Project, Shot
-import unittest
 from shotgun_replica.sync.local_to_shotgun import LocalDBEventSpooler
-from shotgun_replica import entity_manipulation
-import uuid
+from shotgun_replica import entity_manipulation, config
+
+from tests_elefant import testProjectID
+
 from shotgun_api3 import shotgun
-from elefant.utilities import config
+
+import unittest
+import uuid
+import logging
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
         self.testproject = getObject( Project().getType(), testProjectID )
         self.eventprocessor = LocalDBEventSpooler()
-        self.sg = shotgun.Shotgun( config.Configuration().get( config.CONF_SHOTGUN_URL ),
-                                   config.Configuration().get( config.CONF_SHOTGUN_SKRIPT ),
-                                   config.Configuration().get( config.CONF_SHOTGUN_KEY ) )
+        self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
+                                   config.SHOTGUN_BACKSYNC_SKRIPT,
+                                   config.SHOTGUN_BACKSYNC_KEY )
+        logging.basicConfig( level = logging.DEBUG )
 
     def tearDown( self ):
         pass

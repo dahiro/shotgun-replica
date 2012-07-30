@@ -4,14 +4,11 @@ import shotgun_api3
 import time
 import sys
 import json
-import elefant.database.connectors
 
-from shotgun_replica.sync.sync_settings import SyncomaniaSettings
 from shotgun_replica.conversions import PostgresEntityType
 from shotgun_replica.factories import getObject
-from shotgun_replica.connectors import getClassOfType
+from shotgun_replica import config, connectors
 import logging
-from shotgun_replica import config
 
 LOCALDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -23,7 +20,6 @@ class LocalDBEventSpooler( object ):
     src = None # local database connector
     cur = None
     sg = None
-    data = None
 
     def connect( self ):
         """ establish the connections
@@ -31,7 +27,7 @@ class LocalDBEventSpooler( object ):
         establish a connection to local server and shotgun
         """
         try:
-            self.src = elefant.database.connectors.DatabaseConnector()
+            self.src = connectors.DatabaseConnector()
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to database server. " + unicode( error ) )
             sys.exit( LOCALDB_FAILURE )
@@ -43,9 +39,6 @@ class LocalDBEventSpooler( object ):
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to Shotgun server. " + unicode( error ) )
             sys.exit( SHOTGUN_FAILURE )
-
-        self.data = SyncomaniaSettings()
-        self.data.load()
 
     def queryAndProcess( self ):
         """ queries and processes events from shotgun
@@ -80,6 +73,7 @@ class LocalDBEventSpooler( object ):
         """ processes change-events """
         success = False
         logging.debug( changeEvent )
+        logging.debug( "HALLLO" )
 
         corr_entity = changeEvent["corr_entity"]
         if changeEvent["task"] == "creation":
@@ -150,7 +144,7 @@ class LocalDBEventSpooler( object ):
 
         data = event["changed_values"]
 
-        fieldDefs = getClassOfType( entity.type ).shotgun_fields
+        fieldDefs = connectors.getClassOfType( entity.type ).shotgun_fields
 
         hasFields = True
         for attribute in data.keys():

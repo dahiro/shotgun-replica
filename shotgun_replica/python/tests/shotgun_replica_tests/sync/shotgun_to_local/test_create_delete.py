@@ -5,17 +5,18 @@ Created on 25.06.2012
 
 @author: bach
 '''
-import unittest
-from tests_elefant import testProjectID, testShotID
-from elefant.utilities.debug import debug
-from elefant.utilities.definitions import DEBUG
 from shotgun_replica.connectors import DatabaseConnector
 from shotgun_replica.sync.shotgun_to_local import EventProcessor
 from shotgun_replica.factories import getObject
 from shotgun_replica.entities import Shot
-from uuid import uuid1
+
+from tests_elefant import testProjectID, testShotID
+
 from shotgun_api3 import shotgun
-from elefant.utilities import config
+from uuid import uuid1
+import unittest
+from shotgun_replica import config
+import logging
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -23,11 +24,13 @@ OLDVALUE = "wtg"
 class Test( unittest.TestCase ):
 
     def setUp( self ):
-        self.sg = shotgun.Shotgun( config.Configuration().get( config.CONF_SHOTGUN_URL ),
-                                   config.Configuration().get( config.CONF_SHOTGUN_SKRIPT ),
-                                   config.Configuration().get( config.CONF_SHOTGUN_KEY ) )
+        self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
+                                   config.SHOTGUN_SYNC_SKRIPT,
+                                   config.SHOTGUN_SYNC_KEY )
         self.src = DatabaseConnector()
         self.ep = EventProcessor( self.src, self.sg )
+
+        logging.basicConfig( level = logging.DEBUG )
 
     def tearDown( self ):
         pass
@@ -41,7 +44,7 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 1
                                  )[0]
-        debug( lastevent, DEBUG )
+        logging.debug( lastevent )
 
         shotCode = "TEST SHOT (delete me) %s" % uuid1()
 
@@ -53,7 +56,7 @@ class Test( unittest.TestCase ):
                 "code": shotCode
                 }
         newShotDict = self.sg.create( "Shot", data, [] )
-        debug( newShotDict )
+        logging.debug( newShotDict )
 
         newevents = self.sg.find( 
                                  "EventLogEntry",
@@ -64,7 +67,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        debug( newevents, DEBUG, prefix = " SHOT CREATE: " )
+        logging.debug( newevents )
 
         self.assertEqual( newevents[0]["event_type"], "Shotgun_Shot_New", "event not as expected" )
 

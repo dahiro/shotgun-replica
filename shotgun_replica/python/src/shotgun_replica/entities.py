@@ -298,6 +298,58 @@ class ApiUser(Script):
     """
     pass
 
+class AppWelcomeUserConnection(_ShotgunEntity):
+    """
+    internal shotgun name: AppWelcomeUserConnection
+    original shotgun name: App Welcome User Connection
+    """
+    
+    _type = "AppWelcomeUserConnection"
+    remote_id = None
+    local_id = None
+    shotgun_fields = {   'app_welcome': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                     'description': {   'editable': True, 'value': ''},
+                                     'editable': {   'editable': False, 'value': True},
+                                     'entity_type': {   'editable': False,
+                                                        'value': 'AppWelcomeUserConnection'},
+                                     'mandatory': {   'editable': False, 'value': False},
+                                     'name': {   'editable': True, 'value': 'App Welcome'},
+                                     'properties': {   'default_value': {   'editable': False,
+                                                                            'value': None},
+                                                       'summary_default': {   'editable': False,
+                                                                              'value': 'none'},
+                                                       'valid_types': {   'editable': False,
+                                                                          'value': [   'AppWelcome']}}},
+                  'id': {   'data_type': {   'editable': False, 'value': 'number'},
+                            'description': {   'editable': True, 'value': ''},
+                            'editable': {   'editable': False, 'value': False},
+                            'entity_type': {   'editable': False,
+                                               'value': 'AppWelcomeUserConnection'},
+                            'mandatory': {   'editable': False, 'value': False},
+                            'name': {   'editable': True, 'value': 'Id'},
+                            'properties': {   'default_value': {   'editable': False,
+                                                                   'value': None},
+                                              'summary_default': {   'editable': False,
+                                                                     'value': 'none'}}},
+                  'user': {   'data_type': {   'editable': False, 'value': 'entity'},
+                              'description': {   'editable': True, 'value': ''},
+                              'editable': {   'editable': False, 'value': True},
+                              'entity_type': {   'editable': False,
+                                                 'value': 'AppWelcomeUserConnection'},
+                              'mandatory': {   'editable': False, 'value': False},
+                              'name': {   'editable': True, 'value': 'User'},
+                              'properties': {   'default_value': {   'editable': False,
+                                                                     'value': None},
+                                                'summary_default': {   'editable': False,
+                                                                       'value': 'none'},
+                                                'valid_types': {   'editable': False,
+                                                                   'value': [   'HumanUser',
+                                                                                'ApiUser']}}}}
+
+    app_welcome = None
+    user = None
+
+
 class Asset(_ShotgunEntity):
     """
     internal shotgun name: Asset
@@ -2119,6 +2171,149 @@ class BannerUserConnection(_ShotgunEntity):
 
     banner = None
     user = None
+
+
+class Booking(_ShotgunEntity):
+    """
+    internal shotgun name: Booking
+    original shotgun name: Booking
+    """
+    
+    _type = "Booking"
+    remote_id = None
+    local_id = None
+    shotgun_fields = {   'created_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False, 'value': 'Booking'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Date Created'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'}}},
+                  'created_by': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False, 'value': 'Booking'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Created by'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'},
+                                                      'valid_types': {   'editable': True,
+                                                                         'value': [   'HumanUser',
+                                                                                      'ApiUser']}}},
+                  'end_date': {   'data_type': {   'editable': False, 'value': 'date'},
+                                  'description': {   'editable': True, 'value': ''},
+                                  'editable': {   'editable': False, 'value': True},
+                                  'entity_type': {   'editable': False, 'value': 'Booking'},
+                                  'mandatory': {   'editable': False, 'value': False},
+                                  'name': {   'editable': True, 'value': 'End Date'},
+                                  'properties': {   'default_value': {   'editable': False,
+                                                                         'value': None},
+                                                    'summary_default': {   'editable': True,
+                                                                           'value': 'none'}}},
+                  'id': {   'data_type': {   'editable': False, 'value': 'number'},
+                            'description': {   'editable': True, 'value': ''},
+                            'editable': {   'editable': False, 'value': False},
+                            'entity_type': {   'editable': False, 'value': 'Booking'},
+                            'mandatory': {   'editable': False, 'value': False},
+                            'name': {   'editable': True, 'value': 'Id'},
+                            'properties': {   'default_value': {   'editable': False,
+                                                                   'value': None},
+                                              'summary_default': {   'editable': True,
+                                                                     'value': 'none'}}},
+                  'note': {   'data_type': {   'editable': False, 'value': 'text'},
+                              'description': {   'editable': True, 'value': ''},
+                              'editable': {   'editable': False, 'value': True},
+                              'entity_type': {   'editable': False, 'value': 'Booking'},
+                              'mandatory': {   'editable': False, 'value': False},
+                              'name': {   'editable': True, 'value': 'Note'},
+                              'properties': {   'default_value': {   'editable': False,
+                                                                     'value': None},
+                                                'summary_default': {   'editable': True,
+                                                                       'value': 'none'}}},
+                  'project': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                 'description': {   'editable': True, 'value': ''},
+                                 'editable': {   'editable': False, 'value': True},
+                                 'entity_type': {   'editable': False, 'value': 'Booking'},
+                                 'mandatory': {   'editable': False, 'value': False},
+                                 'name': {   'editable': True, 'value': 'Project'},
+                                 'properties': {   'default_value': {   'editable': False,
+                                                                        'value': None},
+                                                   'summary_default': {   'editable': True,
+                                                                          'value': 'none'},
+                                                   'valid_types': {   'editable': True,
+                                                                      'value': [   'Project']}}},
+                  'start_date': {   'data_type': {   'editable': False, 'value': 'date'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': True},
+                                    'entity_type': {   'editable': False, 'value': 'Booking'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Start Date'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'}}},
+                  'updated_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False, 'value': 'Booking'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Date Updated'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'}}},
+                  'updated_by': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False, 'value': 'Booking'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Updated by'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'},
+                                                      'valid_types': {   'editable': True,
+                                                                         'value': [   'HumanUser',
+                                                                                      'ApiUser']}}},
+                  'user': {   'data_type': {   'editable': False, 'value': 'entity'},
+                              'description': {   'editable': True, 'value': ''},
+                              'editable': {   'editable': False, 'value': True},
+                              'entity_type': {   'editable': False, 'value': 'Booking'},
+                              'mandatory': {   'editable': False, 'value': False},
+                              'name': {   'editable': True, 'value': 'Assigned To'},
+                              'properties': {   'default_value': {   'editable': False,
+                                                                     'value': None},
+                                                'summary_default': {   'editable': True,
+                                                                       'value': 'none'},
+                                                'valid_types': {   'editable': True,
+                                                                   'value': [   'HumanUser',
+                                                                                'ApiUser']}}},
+                  'vacation': {   'data_type': {   'editable': False, 'value': 'checkbox'},
+                                  'description': {   'editable': True, 'value': ''},
+                                  'editable': {   'editable': False, 'value': True},
+                                  'entity_type': {   'editable': False, 'value': 'Booking'},
+                                  'mandatory': {   'editable': False, 'value': False},
+                                  'name': {   'editable': True, 'value': 'Vacation'},
+                                  'properties': {   'default_value': {   'editable': False,
+                                                                         'value': None},
+                                                    'summary_default': {   'editable': True,
+                                                                           'value': 'none'}}}}
+
+    created_at = None
+    created_by = None
+    end_date = None
+    note = None
+    project = None
+    start_date = None
+    updated_at = None
+    updated_by = None
+    user = None
+    vacation = None
 
 
 class CameraMocapTakeConnection(_ShotgunEntity):
@@ -4845,6 +5040,183 @@ class CutVersionConnection(_ShotgunEntity):
     version = None
 
 
+class Department(_ShotgunEntity):
+    """
+    internal shotgun name: Department
+    original shotgun name: Department
+    """
+    
+    _type = "Department"
+    remote_id = None
+    local_id = None
+    shotgun_fields = {   'code': {   'data_type': {   'editable': False, 'value': 'text'},
+                              'description': {   'editable': True, 'value': ''},
+                              'editable': {   'editable': False, 'value': True},
+                              'entity_type': {   'editable': False, 'value': 'Department'},
+                              'mandatory': {   'editable': False, 'value': False},
+                              'name': {   'editable': True, 'value': 'Department Short Name'},
+                              'properties': {   'default_value': {   'editable': False,
+                                                                     'value': None},
+                                                'summary_default': {   'editable': True,
+                                                                       'value': 'none'}}},
+                  'color': {   'data_type': {   'editable': False, 'value': 'color'},
+                               'description': {   'editable': True, 'value': ''},
+                               'editable': {   'editable': False, 'value': True},
+                               'entity_type': {   'editable': False, 'value': 'Department'},
+                               'mandatory': {   'editable': False, 'value': False},
+                               'name': {   'editable': True, 'value': 'Color'},
+                               'properties': {   'default_value': {   'editable': False,
+                                                                      'value': None},
+                                                 'summary_default': {   'editable': True,
+                                                                        'value': 'none'}}},
+                  'created_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False,
+                                                       'value': 'Department'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Date Created'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'}}},
+                  'created_by': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False,
+                                                       'value': 'Department'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Created by'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'},
+                                                      'valid_types': {   'editable': True,
+                                                                         'value': [   'HumanUser',
+                                                                                      'ApiUser']}}},
+                  'department_type': {   'data_type': {   'editable': False, 'value': 'list'},
+                                         'description': {   'editable': True, 'value': ''},
+                                         'editable': {   'editable': False, 'value': True},
+                                         'entity_type': {   'editable': False,
+                                                            'value': 'Department'},
+                                         'mandatory': {   'editable': False, 'value': False},
+                                         'name': {   'editable': True,
+                                                     'value': 'Department Type'},
+                                         'properties': {   'default_value': {   'editable': False,
+                                                                                'value': None},
+                                                           'summary_default': {   'editable': True,
+                                                                                  'value': 'none'},
+                                                           'valid_values': {   'editable': True,
+                                                                               'value': None}}},
+                  'id': {   'data_type': {   'editable': False, 'value': 'number'},
+                            'description': {   'editable': True, 'value': ''},
+                            'editable': {   'editable': False, 'value': False},
+                            'entity_type': {   'editable': False, 'value': 'Department'},
+                            'mandatory': {   'editable': False, 'value': False},
+                            'name': {   'editable': True, 'value': 'Id'},
+                            'properties': {   'default_value': {   'editable': False,
+                                                                   'value': None},
+                                              'summary_default': {   'editable': True,
+                                                                     'value': 'none'}}},
+                  'image': {   'data_type': {   'editable': False, 'value': 'image'},
+                               'description': {   'editable': True, 'value': ''},
+                               'editable': {   'editable': False, 'value': True},
+                               'entity_type': {   'editable': False, 'value': 'Department'},
+                               'mandatory': {   'editable': False, 'value': False},
+                               'name': {   'editable': True, 'value': 'Thumbnail'},
+                               'properties': {   'default_value': {   'editable': False,
+                                                                      'value': None},
+                                                 'summary_default': {   'editable': True,
+                                                                        'value': 'none'}}},
+                  'name': {   'data_type': {   'editable': False, 'value': 'text'},
+                              'description': {   'editable': True, 'value': ''},
+                              'editable': {   'editable': False, 'value': True},
+                              'entity_type': {   'editable': False, 'value': 'Department'},
+                              'mandatory': {   'editable': False, 'value': False},
+                              'name': {   'editable': True, 'value': 'Department Name'},
+                              'properties': {   'default_value': {   'editable': False,
+                                                                     'value': None},
+                                                'summary_default': {   'editable': True,
+                                                                       'value': 'none'}}},
+                  'sg_status_list': {   'data_type': {   'editable': False,
+                                                         'value': 'status_list'},
+                                        'description': {   'editable': True, 'value': ''},
+                                        'editable': {   'editable': False, 'value': True},
+                                        'entity_type': {   'editable': False,
+                                                           'value': 'Department'},
+                                        'mandatory': {   'editable': False, 'value': False},
+                                        'name': {   'editable': True, 'value': 'Status'},
+                                        'properties': {   'default_value': {   'editable': True,
+                                                                               'value': 'act'},
+                                                          'summary_default': {   'editable': True,
+                                                                                 'value': 'none'},
+                                                          'valid_values': {   'editable': True,
+                                                                              'value': [   'act',
+                                                                                           'dis']}}},
+                  'tag_list': {   'data_type': {   'editable': False, 'value': 'tag_list'},
+                                  'description': {   'editable': True, 'value': ''},
+                                  'editable': {   'editable': False, 'value': True},
+                                  'entity_type': {   'editable': False, 'value': 'Department'},
+                                  'mandatory': {   'editable': False, 'value': False},
+                                  'name': {   'editable': True, 'value': 'Tags'},
+                                  'properties': {   'default_value': {   'editable': False,
+                                                                         'value': None},
+                                                    'summary_default': {   'editable': True,
+                                                                           'value': 'none'},
+                                                    'valid_types': {   'editable': True,
+                                                                       'value': ['Tag']}}},
+                  'updated_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False,
+                                                       'value': 'Department'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Date Updated'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'}}},
+                  'updated_by': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': False},
+                                    'entity_type': {   'editable': False,
+                                                       'value': 'Department'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Updated by'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'},
+                                                      'valid_types': {   'editable': True,
+                                                                         'value': [   'HumanUser',
+                                                                                      'ApiUser']}}},
+                  'users': {   'data_type': {   'editable': False, 'value': 'multi_entity'},
+                               'description': {   'editable': True, 'value': ''},
+                               'editable': {   'editable': False, 'value': True},
+                               'entity_type': {   'editable': False, 'value': 'Department'},
+                               'mandatory': {   'editable': False, 'value': False},
+                               'name': {   'editable': True, 'value': 'People'},
+                               'properties': {   'default_value': {   'editable': False,
+                                                                      'value': None},
+                                                 'summary_default': {   'editable': True,
+                                                                        'value': 'none'},
+                                                 'valid_types': {   'editable': True,
+                                                                    'value': [   'HumanUser',
+                                                                                 'ApiUser']}}}}
+
+    code = None
+    color = None
+    created_at = None
+    created_by = None
+    department_type = None
+    name = None
+    sg_status_list = None
+    tag_list = None
+    updated_at = None
+    updated_by = None
+    users = None
+
+
 class ElementShotConnection(_ShotgunEntity):
     """
     internal shotgun name: ElementShotConnection
@@ -4952,6 +5324,7 @@ class EventLogEntry(_ShotgunEntity):
                                                                          'value': 'none'},
                                                   'valid_types': {   'editable': True,
                                                                      'value': [   'ApiUser',
+                                                                                  'AppWelcome',
                                                                                   'Asset',
                                                                                   'AssetLibrary',
                                                                                   'Attachment',
@@ -4965,6 +5338,7 @@ class EventLogEntry(_ShotgunEntity):
                                                                                   'CustomNonProjectEntity01',
                                                                                   'CustomNonProjectEntity02',
                                                                                   'CustomNonProjectEntity15',
+                                                                                  'Department',
                                                                                   'Group',
                                                                                   'HumanUser',
                                                                                   'Icon',
@@ -5253,7 +5627,21 @@ class Person(_ShotgunEntity):
     _type = "HumanUser"
     remote_id = None
     local_id = None
-    shotgun_fields = {   'banners': {   'data_type': {   'editable': False, 'value': 'multi_entity'},
+    shotgun_fields = {   'app_welcomes': {   'data_type': {   'editable': False,
+                                                       'value': 'multi_entity'},
+                                      'description': {   'editable': True, 'value': ''},
+                                      'editable': {   'editable': False, 'value': True},
+                                      'entity_type': {   'editable': False,
+                                                         'value': 'HumanUser'},
+                                      'mandatory': {   'editable': False, 'value': False},
+                                      'name': {   'editable': True, 'value': 'App Welcomes'},
+                                      'properties': {   'default_value': {   'editable': False,
+                                                                             'value': None},
+                                                        'summary_default': {   'editable': False,
+                                                                               'value': 'none'},
+                                                        'valid_types': {   'editable': False,
+                                                                           'value': [   'AppWelcome']}}},
+                  'banners': {   'data_type': {   'editable': False, 'value': 'multi_entity'},
                                  'description': {   'editable': True, 'value': ''},
                                  'editable': {   'editable': False, 'value': True},
                                  'entity_type': {   'editable': False, 'value': 'HumanUser'},
@@ -5265,6 +5653,18 @@ class Person(_ShotgunEntity):
                                                                           'value': 'none'},
                                                    'valid_types': {   'editable': False,
                                                                       'value': [   'Banners']}}},
+                  'bookings': {   'data_type': {   'editable': False, 'value': 'multi_entity'},
+                                  'description': {   'editable': True, 'value': ''},
+                                  'editable': {   'editable': False, 'value': False},
+                                  'entity_type': {   'editable': False, 'value': 'HumanUser'},
+                                  'mandatory': {   'editable': False, 'value': False},
+                                  'name': {   'editable': True, 'value': 'Bookings'},
+                                  'properties': {   'default_value': {   'editable': False,
+                                                                         'value': None},
+                                                    'summary_default': {   'editable': False,
+                                                                           'value': 'none'},
+                                                    'valid_types': {   'editable': False,
+                                                                       'value': [   'Booking']}}},
                   'created_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
                                     'description': {   'editable': True, 'value': ''},
                                     'editable': {   'editable': False, 'value': False},
@@ -5290,6 +5690,19 @@ class Person(_ShotgunEntity):
                                                       'valid_types': {   'editable': True,
                                                                          'value': [   'HumanUser',
                                                                                       'ApiUser']}}},
+                  'department': {   'data_type': {   'editable': False, 'value': 'entity'},
+                                    'description': {   'editable': True, 'value': ''},
+                                    'editable': {   'editable': False, 'value': True},
+                                    'entity_type': {   'editable': False,
+                                                       'value': 'HumanUser'},
+                                    'mandatory': {   'editable': False, 'value': False},
+                                    'name': {   'editable': True, 'value': 'Department'},
+                                    'properties': {   'default_value': {   'editable': False,
+                                                                           'value': None},
+                                                      'summary_default': {   'editable': True,
+                                                                             'value': 'none'},
+                                                      'valid_types': {   'editable': True,
+                                                                         'value': [   'Department']}}},
                   'email': {   'data_type': {   'editable': False, 'value': 'text'},
                                'description': {   'editable': True, 'value': ''},
                                'editable': {   'editable': False, 'value': True},
@@ -5678,9 +6091,12 @@ class Person(_ShotgunEntity):
                                                                          'value': [   'HumanUser',
                                                                                       'ApiUser']}}}}
 
+    app_welcomes = None
     banners = None
+    bookings = None
     created_at = None
     created_by = None
+    department = None
     email = None
     email_all_deliveries = None
     email_all_notes = None
@@ -7222,6 +7638,16 @@ class Project(_ShotgunEntity):
                                                                      'value': None},
                                                 'summary_default': {   'editable': True,
                                                                        'value': 'none'}}},
+                  'color': {   'data_type': {   'editable': False, 'value': 'color'},
+                               'description': {   'editable': True, 'value': ''},
+                               'editable': {   'editable': False, 'value': True},
+                               'entity_type': {   'editable': False, 'value': 'Project'},
+                               'mandatory': {   'editable': False, 'value': False},
+                               'name': {   'editable': True, 'value': 'Color'},
+                               'properties': {   'default_value': {   'editable': False,
+                                                                      'value': None},
+                                                 'summary_default': {   'editable': True,
+                                                                        'value': 'none'}}},
                   'created_at': {   'data_type': {   'editable': False, 'value': 'date_time'},
                                     'description': {   'editable': True, 'value': ''},
                                     'editable': {   'editable': False, 'value': False},
@@ -7671,6 +8097,7 @@ class Project(_ShotgunEntity):
                                                                     'value': [   'HumanUser']}}}}
 
     code = None
+    color = None
     created_at = None
     created_by = None
     current_user_favorite = None
@@ -8128,6 +8555,7 @@ class Reply(_ShotgunEntity):
                                                                          'value': 'none'},
                                                   'valid_types': {   'editable': True,
                                                                      'value': [   'ApiUser',
+                                                                                  'AppWelcome',
                                                                                   'Asset',
                                                                                   'AssetLibrary',
                                                                                   'Attachment',
@@ -8141,6 +8569,7 @@ class Reply(_ShotgunEntity):
                                                                                   'CustomNonProjectEntity01',
                                                                                   'CustomNonProjectEntity02',
                                                                                   'CustomNonProjectEntity15',
+                                                                                  'Department',
                                                                                   'Group',
                                                                                   'HumanUser',
                                                                                   'Icon',
@@ -11761,6 +12190,22 @@ class Version(_ShotgunEntity):
                                                                                        'value': True},
                                                              'summary_default': {   'editable': True,
                                                                                     'value': 'none'}}},
+                  'sg_uploaded_movie_frame_rate': {   'data_type': {   'editable': False,
+                                                                       'value': 'float'},
+                                                      'description': {   'editable': True,
+                                                                         'value': ''},
+                                                      'editable': {   'editable': False,
+                                                                      'value': True},
+                                                      'entity_type': {   'editable': False,
+                                                                         'value': 'Version'},
+                                                      'mandatory': {   'editable': False,
+                                                                       'value': False},
+                                                      'name': {   'editable': True,
+                                                                  'value': 'Uploaded Movie Frame Rate'},
+                                                      'properties': {   'default_value': {   'editable': False,
+                                                                                             'value': None},
+                                                                        'summary_default': {   'editable': False,
+                                                                                               'value': 'none'}}},
                   'sg_uploaded_movie_mp4': {   'data_type': {   'editable': False,
                                                                 'value': 'url'},
                                                'description': {   'editable': True,
@@ -11779,6 +12224,22 @@ class Version(_ShotgunEntity):
                                                                                            'value': True},
                                                                  'summary_default': {   'editable': False,
                                                                                         'value': 'none'}}},
+                  'sg_uploaded_movie_transcoding_status': {   'data_type': {   'editable': False,
+                                                                               'value': 'number'},
+                                                              'description': {   'editable': True,
+                                                                                 'value': ''},
+                                                              'editable': {   'editable': False,
+                                                                              'value': True},
+                                                              'entity_type': {   'editable': False,
+                                                                                 'value': 'Version'},
+                                                              'mandatory': {   'editable': False,
+                                                                               'value': False},
+                                                              'name': {   'editable': True,
+                                                                          'value': 'Uploaded Movie Transcoding Status'},
+                                                              'properties': {   'default_value': {   'editable': False,
+                                                                                                     'value': None},
+                                                                                'summary_default': {   'editable': False,
+                                                                                                       'value': 'none'}}},
                   'sg_uploaded_movie_webm': {   'data_type': {   'editable': False,
                                                                  'value': 'url'},
                                                 'description': {   'editable': True,
@@ -11921,7 +12382,9 @@ class Version(_ShotgunEntity):
     sg_status_list = None
     sg_task = None
     sg_uploaded_movie = None
+    sg_uploaded_movie_frame_rate = None
     sg_uploaded_movie_mp4 = None
+    sg_uploaded_movie_transcoding_status = None
     sg_uploaded_movie_webm = None
     sg_version_type = None
     tag_list = None

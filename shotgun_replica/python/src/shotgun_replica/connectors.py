@@ -7,7 +7,7 @@ Created on 21.05.2012
 '''
 from shotgun_replica.conversions import getDBConnection, PostgresEntityType, \
     getConversionSg2Pg
-from shotgun_replica import _entity_mgmt
+from shotgun_replica import base_entity
 import logging
 
 class DatabaseConnector( object ):
@@ -62,7 +62,7 @@ class DatabaseConnector( object ):
             entityType = entity.type
             entityID = entity.remote_id
             entityLocalID = entity.local_id
-        elif isinstance( entity, _entity_mgmt._ShotgunEntity ):
+        elif isinstance( entity, base_entity.ShotgunBaseEntity ):
             entityType = entity.getType()
             entityID = entity.getRemoteID()
             entityLocalID = entity.getLocalID()
@@ -108,7 +108,7 @@ class DatabaseConnector( object ):
                 query += "\"%s\" = \"%s\" || %s" % ( attribute, attribute, "%s" )
                 if isinstance( value, PostgresEntityType ):
                     values = [value, ]
-                elif isinstance( value, _entity_mgmt._ShotgunEntity ):
+                elif isinstance( value, base_entity.ShotgunBaseEntity ):
                     values = [value.getPgObj(), ]
                 else:
                     raise Exception( "unknown format for appending: %s" % type( value ) )
@@ -165,7 +165,7 @@ class DatabaseConnector( object ):
         """
         if type( item ) == dict:
             return self._addDict( item )
-        elif isinstance( item, _entity_mgmt._ShotgunEntity ):
+        elif isinstance( item, base_entity.ShotgunBaseEntity ):
             return self._addObj( item )
 
     def _addDict( self, item ):
@@ -212,7 +212,7 @@ class DatabaseConnector( object ):
         replacers = ["%s"] * len( fieldNames )
 
         for i in range( len( fieldValues ) ):
-            if isinstance( fieldValues[i], _entity_mgmt._ShotgunEntity ):
+            if isinstance( fieldValues[i], base_entity.ShotgunBaseEntity ):
                 fieldValues[i] = fieldValues[i].getPgObj()
             if type( fieldValues[i] ) == dict:
                 local_id = None

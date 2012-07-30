@@ -6,18 +6,19 @@ Created on 25.06.2012
 @author: bach
 '''
 import unittest
-import httplib2
+from shotgun_api3.lib import httplib2
 import urllib
 import json
-from elefant.utilities.debug import debug
 import datetime
 from shotgun_replica import config
+import thread
+import time
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
         pass
-
+        
     def tearDown( self ):
         pass
 
@@ -49,8 +50,6 @@ class Test( unittest.TestCase ):
         response, content = http.request( url, "POST", params )
         http.request
 
-        debug( response )
-        debug( content )
 
     def testProjectUpdate( self ):
 
@@ -77,8 +76,6 @@ class Test( unittest.TestCase ):
 
         response, content = http.request( url, "PUT", params )
 
-        debug( response )
-        debug( content )
 
 
 if __name__ == "__main__":

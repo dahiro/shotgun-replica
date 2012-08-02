@@ -15,7 +15,9 @@ def getObject( entityType, remote_id = None, local_id = None ):
     
     @return: the object or None if object not available
     """
-
+    
+    tableName = connectors.getClassOfType( entityType )._type
+    
     dbc = connectors.DatabaseConnector()
 
     filters = []
@@ -27,7 +29,7 @@ def getObject( entityType, remote_id = None, local_id = None ):
 
     sqlFilter = " OR ".join( filters )
 
-    resultList = dbc.getListOfEntities( entityType, sqlFilter )
+    resultList = dbc.getListOfEntities( tableName, sqlFilter )
 
     if len( resultList ) == 1:
         return resultList[0]

@@ -2,12 +2,17 @@
 
 from shotgun_replica import entity_manipulation, conversions
 from shotgun_replica.conversions import PostgresEntityType
-from shotgun_replica import base_entity 
+from shotgun_replica import base_entity
 
 import logging
 import shotgun_replica
+import datetime
 
 class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
+    """
+    baseclass for shotgun-entities
+    """
+
     _changed_values = []
 
     def __init__( self, *args, **kwargs ):
@@ -43,9 +48,15 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         return self.getRemoteID()
 
     def getRemoteID( self ):
+        """
+        get ID that is used in shotgun
+        """
         return self.remote_id
 
     def getLocalID( self ):
+        """
+        get ID that is used in local database (for instant object creation)
+        """
         return self.local_id
 
     def getSgObj( self ):
@@ -63,7 +74,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                     'id': remote_id
                     }
 
-    def getShortDict( self ): 
+    def getShortDict( self ):
+        """
+        get smallest possible dict that identifies an object
+        """
         return {
             "type": self.getType(),
             "remote_id": self.getRemoteID(),
@@ -71,6 +85,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         }
 
     def getPgObj( self ):
+        """
+        get shortest postgres-representation of an entity
+        """
         return conversions.PostgresEntityType( self.getType(),
                                                self.getLocalID(),
                                                self.getRemoteID() )
@@ -88,15 +105,20 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         return object.__setattr__( self, *args, **kwargs )
 
     def getField( self, fieldname ):
+        """
+        get field value of this object
+        """
+        logging.debug( "getField: getting field with name %s" % fieldname )
         return self.__getattribute__( fieldname )
 
-    def getShotgunDict( self ):
+    def getDict( self ):
         """
-        removes all read-only-attributes
-        
-        @return: returns json-like dict for shotgun-storage
+        @return: returns json-like dict for use in further json-using interfaces
         """
         dataDict = {}
+        if self.getLocalID() != None:
+            dataDict["__local_id"] = self.getLocalID()
+
         for ( fieldname, fielddef ) in self.shotgun_fields.iteritems():
 
             dataFieldname = fieldname
@@ -109,15 +131,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                                                   "summary"]:
                 continue
 
-            if not fielddef["editable"]["value"]:
-                continue
-
             fieldvalue = object.__getattribute__( self, dataFieldname )
             if fieldvalue == None:
-#                dataDict[fieldname] = None
-                continue
-
-            if fielddef["data_type"]["value"] == "entity":
+                pass
+            elif fielddef["data_type"]["value"] == "entity":
 
                 if type( fieldvalue ) == PostgresEntityType:
                     fieldvalue = fieldvalue.getSgObj()
@@ -135,7 +152,34 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                         storevalue.append( singleFieldvalue.getSgObj() )
                 fieldvalue = storevalue
 
+            elif fielddef["data_type"]["value"] == "date_time":
+                if type( fieldvalue ) == datetime.datetime:
+                    fieldvalue = fieldvalue.strftime( "%Y-%m-%d %H:%M:%S" )
+
+            elif fielddef["data_type"]["value"] == "date":
+                if type( fieldvalue ) == datetime.date:
+                    fieldvalue = fieldvalue.strftime( "%Y-%m-%d" )
+
             dataDict[fieldname] = fieldvalue
+
+        return dataDict
+
+    def getShotgunDict( self ):
+        """
+        removes all read-only-attributes
+        
+        @return: returns json-like dict for shotgun-storage
+        """
+        dataDict = self.getDict()
+        removeKeys = [ "type", "id", "__local_id" ]
+        for key in removeKeys:
+            dataDict.pop( key )
+
+        for ( fieldname, fielddef ) in self.shotgun_fields.iteritems():
+
+            if not fielddef["editable"]["value"]:
+                dataDict.pop( fieldname )
+                continue
 
         return dataDict
 
@@ -143,20 +187,22 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         sets attributes from a dict-object
         """
-        
+
         for fieldname in dataDict.keys():
-            
-            if not self.shotgun_fields.has_key(fieldname):
+
+            if not self.shotgun_fields.has_key( fieldname ):
                 continue
 
             fieldvalue = dataDict[ fieldname ]
-                
-            self.__setattr__(fieldname, fieldvalue)
+
+            self.__setattr__( fieldname, fieldvalue )
 
         return dataDict
 
     def __getattribute__( self, *args, **kwargs ):
         name = args[0]
+        logging.debug( "getting field attribute %s" % name )
+
         if name == "id":
             name = "remote_id"
         if name == "sg_local_id":
@@ -171,6 +217,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         if fielddef.has_key( name ):
             if fielddef[name]["data_type"]["value"] == "entity":
                 entityObj = fieldvalue
+
+                logging.debug( type( entityObj ) )
+                logging.debug( entityObj )
 
                 if type( entityObj ) == PostgresEntityType:
                     from shotgun_replica import factories
@@ -200,13 +249,19 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             return -99999
         if isinstance( objB, base_entity.ShotgunBaseEntity ):
             if objB.getType() == self.getType():
-                return cmp( self.getID(), objB.getID() )
+                if self.getRemoteID() and objB.getRemoteID():
+                    return cmp( self.getRemoteID(), objB.getRemoteID() )
+                else:
+                    return cmp( self.getID(), objB.getID() )
             else:
                 return cmp( self.getType(), objB.getType() )
         else:
             return -99999
 
     def save( self ):
+        """
+        save this objects state to database. creates a new record or updates the existing record 
+        """
         if not self.isConsistent():
 
             logging.debug( "changing localID: %s" % str( self.getLocalID() ) )
@@ -234,6 +289,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         return None
 
     def isConsistent( self ):
-        """ checks wheater there are any changed values 
+        """ checks weather there are any changed values 
         """
         return len( self._changed_values ) == 0

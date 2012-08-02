@@ -9,6 +9,7 @@ from shotgun_replica.conversions import getDBConnection, PostgresEntityType, \
     getConversionSg2Pg
 from shotgun_replica import base_entity
 import logging
+import inspect
 
 class DatabaseConnector( object ):
     def __new__( cls, *args, **kw ):
@@ -21,15 +22,15 @@ class DatabaseConnector( object ):
 
         return cls._instance
 
-    def getListOfEntities( self, entityType, filter = None, order = None, variables = None, query = None ):
+    def getListOfEntities( self, entityType, queryFilter = None, order = None, variables = None, query = None ):
 
         cur = self.con.cursor()
 
         if query == None:
             query = "SELECT * FROM \"%s\"" % entityType
 
-        if filter != None:
-            query += " WHERE " + filter
+        if queryFilter != None:
+            query += " WHERE " + queryFilter
 
         if order != None:
             query += " ORDER BY %s" % order
@@ -91,11 +92,11 @@ class DatabaseConnector( object ):
             if entityLocalID != None:
                 filters.append( "__local_id=%s" )
                 values.append( entityLocalID )
-    
+
             if entityID != None:
                 filters.append( "id=%s" )
                 values.append( entityID )
-    
+
             query += " WHERE (" + " OR ".join( filters ) + " )"
 
             logging.debug( cur.mogrify( query, values ) )
@@ -199,6 +200,7 @@ class DatabaseConnector( object ):
         fieldNames = []
 
         for fieldName in item.shotgun_fields.keys():
+            logging.debug( "converting field with name %s" % fieldName )
             sgType = fieldListDef[fieldName]['data_type']['value']
             convFunc = getConversionSg2Pg( sgType )
             if convFunc != None:
@@ -246,18 +248,19 @@ class DatabaseConnector( object ):
         logging.debug( cursor.mogrify( query, ( myObj.remote_id, myObj.local_id ) ) )
         cursor.execute( query, ( myObj.remote_id, myObj.local_id ) )
 
-
 def getClassOfType( entityType ):
     """
     @return: returns class of specific entityType 
     """
     try:
         from shotgun_replica import entities
-        if entities.__dict__.has_key( entityType ) \
-                and ( type( entities.__dict__[entityType] ) == type ):
-            return entities.__dict__[entityType]
+        if entities.__dict__.has_key( entityType ):
+            cls = entities.__dict__[entityType]
+            if type( cls ) == type:
+                return cls
+            else:
+                return None
         else:
             return None
     except ImportError:
         return None
-

@@ -15,12 +15,15 @@ import thread
 import time
 import logging
 from shotgun_replica_tests import testNodeID_1
+import uuid
+import os
+import sys
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
         pass
-        
+
     def tearDown( self ):
         pass
 
@@ -50,12 +53,16 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "POST", params )
-        logging.debug(response)
-        logging.debug(content)
+        logging.debug( "PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION" )
+        logging.debug( response )
+        logging.debug( content )
+        self.assertEqual( response["status"], "200" )
+        entityDict = json.loads( content )
+        self.assertTrue( entityDict["__local_id"] != None )
 
     def testProjectUpdate( self ):
 
-        url = 'http://localhost:8080/Project/29'
+        url = 'http://localhost:8080/Project/74'
 
         userdict = config.getUserDict()
         nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
@@ -67,8 +74,8 @@ class Test( unittest.TestCase ):
                        "updated_at": nowstr,
                        }
 
-        putData = { 
-                   "data": json.dumps(projectData)
+        putData = {
+                   "data": json.dumps( projectData )
                    }
 
         params = urllib.urlencode( putData )
@@ -77,47 +84,47 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "PUT", params )
-        logging.debug(response)
-        logging.debug(content)
+        logging.debug( "PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE" )
+        logging.debug( response )
+        logging.debug( content )
+        self.assertEqual( response["status"], "200" )
+        entityDict = json.loads( content )
+        self.assertEqual( entityDict["updated_at"], nowstr )
 
+    def testNodeVersionCreation( self ):
+        node = factories.getObject( "Node", remote_id = testNodeID_1 )
+        output = factories.getObject( "Node", remote_id = testNodeID_1 )
 
-    def testProjectUpdate( self ):
+        entities.Node._type
 
-        url = 'http://localhost:8080/Project/29'
-
-        userdict = config.getUserDict()
-        nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
-
-        projectData = {
-                       "sg_status": "Active",
-                       "sg_due": "2012-08-08",
-                       "updated_by": userdict,
-                       "updated_at": nowstr,
-                       }
-
-        putData = { 
-                   "data": json.dumps(projectData)
-                   }
-
-        params = urllib.urlencode( putData )
-
-        http = httplib2.Http()
-        http.add_credentials( 'username', 'password' )
-
-        response, content = http.request( url, "PUT", params )
-        logging.debug(response)
-        logging.debug(content)
-
-    def testNodeVersionCreation(self):
-        node = factories.getObject("Node", remote_id = testNodeID_1)
-        
         versionData = {
-                       entities.Version.code
-                       entities.Version.description
-                       entities.Version.entity
-                       entities.Version.sg_task
+                       "code": "001",
+                       "description": "delete me %s" % uuid.uuid1(),
+                       "entity": node.sg_link.getSgObj(),
+                       "sg_source_output": output.getSgObj()
                        }
+
+        putData = {
+                   "data": json.dumps( versionData )
+                   }
+
+        params = urllib.urlencode( putData )
+
+        http = httplib2.Http()
+        http.add_credentials( 'username', 'password' )
+
+        url = 'http://localhost:8080/Version'
+
+        response, content = http.request( url, "POST", params )
+        logging.debug( "NODE CREATION - NODE CREATION - NODE CREATION - NODE CREATION" )
+        logging.debug( response )
+        logging.debug( content )
+        self.assertEqual( response["status"], "200" )
+        entityDict = json.loads( content )
+        self.assertTrue( entityDict["__local_id"] != None )
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
+    logging.basicConfig( level = logging.DEBUG, stream = sys.stdout )
     unittest.main()

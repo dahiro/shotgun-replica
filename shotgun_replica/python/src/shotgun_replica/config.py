@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-
-from elefant.utilities import config
 import os
 
+from elefant.utilities import config
 eleconfig = config.Configuration()
 
 SHOTGUN_URL = eleconfig.get( config.CONF_SHOTGUN_URL )
 
+# shotgun-script that generates events
 SHOTGUN_SYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_SYNC_SKRIPT )
 SHOTGUN_SYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_SYNC_KEY )
 
+# shotgun-script that does not generate events
 SHOTGUN_BACKSYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_SKRIPT )
 SHOTGUN_BACKSYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_KEY )
 
+# folder to store thumbnails locally
 SHOTGUN_LOCAL_THUMBFOLDER = eleconfig.get( config.CONF_SHOTGUN_THUMBFOLDER )
 
 DB_HOST = eleconfig.get( config.CONF_DB_HOST )

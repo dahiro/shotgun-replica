@@ -36,6 +36,9 @@ class DatabaseConnector( object ):
             query += " ORDER BY %s" % order
 
         if variables != None:
+            logging.debug( query )
+            logging.debug( variables )
+
             logging.debug( cur.mogrify( query, variables ) )
             cur.execute( query, variables )
         else:

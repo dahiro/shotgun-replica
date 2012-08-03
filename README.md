@@ -5,5 +5,7 @@ This is a set of python-scripts with a postgres-plugin to sync shotgun to a loca
 
 We use this functionality at Elefant Studios AG (http://www.elefantstudios.ch)
 
+see [wiki](https://github.com/dahiro/shotgun-replica/wiki) for more information
+
 more to come...
 ----------------------

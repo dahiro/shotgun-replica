@@ -18,14 +18,6 @@ class Test(unittest.TestCase):
         self.sg = shotgun_api3.Shotgun( config.SHOTGUN_URL,
                                         config.SHOTGUN_BACKSYNC_SKRIPT,
                                         config.SHOTGUN_BACKSYNC_KEY )
-        eventliste = self.sg.find( 
-                        "Version",
-                        filters = [['id', 'greater_than', current]],
-                        fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
-                        order = [{'column':'id', 'direction':'asc'}],
-                        filter_operator = 'all',
-                        limit = ANZAHL )
-        pass
 
     def tearDown(self):
         pass

@@ -99,7 +99,7 @@ class EventSpooler( object ):
 
                     logging.debug( event )
 
-#                    status = ep.process(event)
+                    status = ep.process(event)
                     status = EVENT_OK
                     if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
                         if status == EVENT_UNKNOWN:
@@ -362,4 +362,6 @@ def saveShotgunImageLocally( url ):
 
 if __name__ == "__main__":
     spooler = EventSpooler()
+    logging.basicConfig( level = logging.DEBUG,
+                         stream = sys.stdout )
     spooler.run()

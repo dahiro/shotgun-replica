@@ -8,7 +8,10 @@ import json
 from shotgun_replica.conversions import PostgresEntityType
 from shotgun_replica.factories import getObject
 from shotgun_replica import config, connectors
+import shotgun_replica
+
 import logging
+import traceback
 
 LOCALDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -30,7 +33,7 @@ class LocalDBEventSpooler( object ):
             self.src = connectors.DatabaseConnector()
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to database server. " + unicode( error ) )
-            sys.exit( LOCALDB_FAILURE )
+            return False
 
         try:
             self.sg = shotgun_api3.Shotgun( config.SHOTGUN_URL,
@@ -38,7 +41,9 @@ class LocalDBEventSpooler( object ):
                                             config.SHOTGUN_BACKSYNC_KEY )
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to Shotgun server. " + unicode( error ) )
-            sys.exit( SHOTGUN_FAILURE )
+            return False
+
+        return True
 
     def queryAndProcess( self ):
         """ queries and processes events from shotgun
@@ -90,8 +95,7 @@ class LocalDBEventSpooler( object ):
             logging.debug( "deleting entity %s with local ID %d",
                            corr_entity.type,
                            corr_entity.local_id )
-            self._deleteEntity( changeEvent )
-            success = True
+            success = self._deleteEntity( changeEvent )
         elif changeEvent["task"] == "addLink":
             logging.debug( "adding link: %s with local ID %d",
                            corr_entity.type,
@@ -106,12 +110,12 @@ class LocalDBEventSpooler( object ):
             self._setProcessed( changeEvent )
 
     def processIteration( self ):
-        self.connect()
-        self.cur = self.src.con.cursor()
-        self.queryAndProcess()
-        self.src.con.commit()
-        self.cur.close()
-        time.sleep( 2 )
+        if self.connect():
+            self.cur = self.src.con.cursor()
+            self.queryAndProcess()
+            self.src.con.commit()
+            self.cur.close()
+            time.sleep( 2 )
 
     def run( self ):
         """ starts the loop of quering, processing pausing """
@@ -120,6 +124,8 @@ class LocalDBEventSpooler( object ):
 
     def _setProcessed( self, event, exception = None ):
         query = "UPDATE \"ChangeEventsToShotgun\" SET processed = 't', exception = %s WHERE id=%s"
+        if exception != None:
+            exception += "\n%s" % traceback.format_exc()
 
         cur = self.src.con.cursor()
         logging.debug( cur.mogrify( query, ( exception, event["id"], ) ) )
@@ -199,6 +205,12 @@ class LocalDBEventSpooler( object ):
         if type( entity.local_id ) == type( 1 ):
             try:
                 obj = getObject( entity.type, local_id = entity.local_id )
+                if not obj:
+                    exception = "Error %s with local_id %d does not exist anymore" % ( entity.type,
+                                                                                       entity.local_id )
+                    self._setProcessed( event, exception = exception )
+                    return False
+
                 data = obj.getShotgunDict()
 
                 newdata = self.sg.create( entity.type, data )
@@ -220,21 +232,32 @@ class LocalDBEventSpooler( object ):
         else:
             exception = "Entity %s has no local_id" % ( str( entity ) )
             self._setProcessed( event, exception = exception )
+            return False
 
     def _deleteEntity( self, event ):
         """ process a delete entity event """
 
         entity = event["corr_entity"]
-        if type( entity.remote_id ) == type( 1 ):
+        entityObj = getObject( entity.type,
+                               local_id = entity.local_id,
+                               remote_id = entity.remote_id )
+
+        if entityObj and entityObj.getRemoteID() != shotgun_replica.UNKNOWN_SHOTGUN_ID:
             try:
-                self.sg.delete( entity.type, entity.remote_id )
+                self.sg.delete( entity.type, entityObj.getRemoteID() )
                 return True
             except shotgun_api3.Fault, fault:
-                #event["type"] = "CouchdbChangeEvents"
                 exception = "Error %s" % ( str( fault ) )
                 self._setProcessed( event, exception = exception )
                 return False
+        else:
+            exception = "Entity %s does not exist or has no remote_id" % ( str( entity ) )
+            self._setProcessed( event, exception = exception )
+            return False
+
 
 if __name__ == "__main__":
     spooler = LocalDBEventSpooler()
+    logging.basicConfig( level = logging.DEBUG,
+                         stream = sys.stdout )
     spooler.run()

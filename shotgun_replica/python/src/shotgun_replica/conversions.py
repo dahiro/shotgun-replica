@@ -218,9 +218,10 @@ class PostgresEntityType( object ):
             self.remote_id = shotgun_replica.UNKNOWN_SHOTGUN_ID
 
     def __repr__( self ):
-        return super( PostgresEntityType, self ).__repr__() + " %s (%d,%d)" % ( self.type,
-                                                                 self.local_id,
-                                                                 self.remote_id )
+        return "%s (%d,%d) %s" % ( self.type,
+                                   self.local_id,
+                                   self.remote_id,
+                                   super( PostgresEntityType, self ).__repr__() )
 
     def getSgObj( self ):
         return {"id": self.remote_id,

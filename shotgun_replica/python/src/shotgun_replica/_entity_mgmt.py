@@ -173,13 +173,17 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         dataDict = self.getDict()
         removeKeys = [ "type", "id", "__local_id" ]
         for key in removeKeys:
-            dataDict.pop( key )
+            if dataDict.has_key( key ):
+                dataDict.pop( key )
 
         for ( fieldname, fielddef ) in self.shotgun_fields.iteritems():
 
-            if not fielddef["editable"]["value"]:
+            if ( not fielddef["editable"]["value"] ) and dataDict.has_key( fieldname ):
                 dataDict.pop( fieldname )
-                continue
+
+            if dataDict.has_key( fieldname ) and dataDict[fieldname] == None:
+                dataDict.pop( fieldname )
+
 
         return dataDict
 

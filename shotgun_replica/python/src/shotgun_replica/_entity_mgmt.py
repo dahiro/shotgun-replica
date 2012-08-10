@@ -137,9 +137,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             elif fielddef["data_type"]["value"] == "entity":
 
                 if type( fieldvalue ) == PostgresEntityType:
-                    fieldvalue = fieldvalue.getSgObj()
+                    fieldvalue = fieldvalue.getShortDict()
                 elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
-                    fieldvalue = fieldvalue.getSgObj()
+                    fieldvalue = fieldvalue.getShortDict()
 
             elif fielddef["data_type"]["value"] == "multi_entity":
                 storevalue = []
@@ -147,9 +147,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 for singleFieldvalue in fieldvalue:
 
                     if type( singleFieldvalue ) == PostgresEntityType:
-                        storevalue.append( singleFieldvalue.getSgObj() )
+                        storevalue.append( singleFieldvalue.getShortDict() )
                     elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
-                        storevalue.append( singleFieldvalue.getSgObj() )
+                        storevalue.append( singleFieldvalue.getShortDict() )
                 fieldvalue = storevalue
 
             elif fielddef["data_type"]["value"] == "date_time":
@@ -170,22 +170,60 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         
         @return: returns json-like dict for shotgun-storage
         """
-        dataDict = self.getDict()
+
+        dataDict = {}
         removeKeys = [ "type", "id", "__local_id" ]
-        for key in removeKeys:
-            if dataDict.has_key( key ):
-                dataDict.pop( key )
 
         for ( fieldname, fielddef ) in self.shotgun_fields.iteritems():
+            if fieldname in removeKeys:
+                continue
 
-            if ( not fielddef["editable"]["value"] ) and dataDict.has_key( fieldname ):
-                dataDict.pop( fieldname )
+            dataFieldname = fieldname
 
-            if dataDict.has_key( fieldname ) and dataDict[fieldname] == None:
-                dataDict.pop( fieldname )
 
+            if fieldname == "id":
+                dataFieldname = "remote_id"
+
+            if fielddef["data_type"]["value"] in ["pivot_column",
+                                                  "image",
+                                                  "summary"]:
+                continue
+
+            fieldvalue = object.__getattribute__( self, dataFieldname )
+            if fieldvalue == None:
+                continue
+            
+            if ( not fielddef["editable"]["value"] ):
+                continue
+                
+            if fielddef["data_type"]["value"] == "entity":
+
+                if type( fieldvalue ) == PostgresEntityType:
+                    fieldvalue = fieldvalue.getSgObj()
+                elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
+                    fieldvalue = fieldvalue.getSgObj()
+
+            elif fielddef["data_type"]["value"] == "multi_entity":
+                storevalue = []
+                for singleFieldvalue in fieldvalue:
+                    if type( singleFieldvalue ) == PostgresEntityType:
+                        storevalue.append( singleFieldvalue.getSgObj() )
+                    elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
+                        storevalue.append( singleFieldvalue.getSgObj() )
+                fieldvalue = storevalue
+
+            elif fielddef["data_type"]["value"] == "date_time":
+                if type( fieldvalue ) == datetime.datetime:
+                    fieldvalue = fieldvalue.strftime( "%Y-%m-%d %H:%M:%S" )
+
+            elif fielddef["data_type"]["value"] == "date":
+                if type( fieldvalue ) == datetime.date:
+                    fieldvalue = fieldvalue.strftime( "%Y-%m-%d" )
+
+            dataDict[fieldname] = fieldvalue
 
         return dataDict
+
 
     def loadFromDict( self, dataDict ):
         """

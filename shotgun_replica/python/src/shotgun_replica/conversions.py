@@ -227,6 +227,16 @@ class PostgresEntityType( object ):
         return {"id": self.remote_id,
                 "type": self.type}
 
+    def getShortDict( self ):
+        """
+        get smallest possible dict that identifies an object
+        """
+        return {
+            "type": self.type,
+            "id": self.remote_id,
+            "__local_id": self.local_id,
+        }
+
 def adapt_entity( entity ):
     return AsIs( "ROW(%s, %s, %s)::entity_sync" % ( adapt( entity.type ),
                                                   adapt( entity.local_id ),

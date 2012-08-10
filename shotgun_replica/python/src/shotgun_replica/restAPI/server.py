@@ -37,7 +37,7 @@ class Handler( object ):
             entity = self._getEntity( entityType, localID, remoteID )
 
             if entity:
-                return json.dumps( entity.getShotgunDict(), indent = 4 )
+                return json.dumps( entity.getDict(), indent = 4 )
             else:
                 return web.notfound()
         else:

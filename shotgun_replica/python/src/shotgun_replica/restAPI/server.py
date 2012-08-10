@@ -27,13 +27,17 @@ class Handler( object ):
         retrieve multiple objects
         GET-request at /[entityType]?attribute=value
         examples: /Node?project=(Project,-1,23)
+        
+        parameters:
+        __orderby=[attributename]   order by attribute
+        __limit=1                   limit results
         """
 
         if localID or remoteID:
             entity = self._getEntity( entityType, localID, remoteID )
 
             if entity:
-                return json.dumps( entity.getShotgunDict() )
+                return json.dumps( entity.getShotgunDict(), indent = 4 )
             else:
                 return web.notfound()
         else:
@@ -43,16 +47,30 @@ class Handler( object ):
             filters = []
             filterValues = []
             for attribute in userData.keys():
+                if attribute.startswith("__"):
+                    continue
                 filters.append( "%s=%s" % ( attribute, "%s" ) )
                 filterValues.append( userData[attribute] )
 
-            entities = factories.getObjects( entityType, " AND ".join( filters ), filterValues )
+            orderby = None
+            if userData.has_key("__orderby"):
+                orderby = userData["__orderby"]
+
+            limit = None
+            if userData.has_key("__limit"):
+                limit = userData["__limit"]
+
+            entities = factories.getObjects( entityType, 
+                                             " AND ".join( filters ), 
+                                             filterValues, 
+                                             orderby = orderby, 
+                                             limit = limit )
             json_entities = []
 
             for entity in entities:
                 json_entities.append( entity.getShortDict() )
 
-            return json.dumps( json_entities )
+            return json.dumps( json_entities, indent = 4 )
 
     def DELETE( self, entityType, localID, remoteID ):
         """

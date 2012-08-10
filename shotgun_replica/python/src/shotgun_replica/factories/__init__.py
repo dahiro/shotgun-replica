@@ -30,14 +30,14 @@ def getObject( entityType, remote_id = None, local_id = None ):
 
     sqlFilter = " OR ".join( filters )
 
-    resultList = dbc.getListOfEntities( tableName, sqlFilter )
+    resultList = dbc.getListOfEntities( tableName, sqlFilter, limit = "1" )
 
     if len( resultList ) == 1:
         return resultList[0]
     else:
         return None
 
-def getObjects( entityType, filters, filterValues, orderby = None ):
+def getObjects( entityType, filters, filterValues, orderby = None, limit = None ):
     dbc = connectors.DatabaseConnector()
     for filterValue in filterValues:
         if isinstance( filterValue, base_entity.ShotgunBaseEntity ):
@@ -45,5 +45,9 @@ def getObjects( entityType, filters, filterValues, orderby = None ):
             filterValues.append( filterValue.getPgObj() )
 
     logging.debug( filterValues )
-    resultList = dbc.getListOfEntities( entityType, filters, variables = filterValues, order = orderby )
+    resultList = dbc.getListOfEntities( entityType,
+                                        filters,
+                                        variables = filterValues,
+                                        order = orderby,
+                                        limit = limit )
     return resultList

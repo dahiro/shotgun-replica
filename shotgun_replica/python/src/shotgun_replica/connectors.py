@@ -22,18 +22,22 @@ class DatabaseConnector( object ):
 
         return cls._instance
 
-    def getListOfEntities( self, entityType, queryFilter = None, order = None, variables = None, query = None ):
+    def getListOfEntities( self, entityType, queryFilter = None, order = None, variables = None, limit = None ):
 
         cur = self.con.cursor()
-
-        if query == None:
-            query = "SELECT * FROM \"%s\"" % entityType
+        query = "SELECT * FROM \"%s\"" % entityType
 
         if queryFilter != None:
+            queryFilter = queryFilter.replace(";", "")
             query += " WHERE " + queryFilter
 
         if order != None:
+            order = order.replace(";", "")
             query += " ORDER BY %s" % order
+
+        if limit != None:
+            limit = limit.replace(";", "")
+            query += " LIMIT %s" % str(limit)
 
         if variables != None:
             logging.debug( query )

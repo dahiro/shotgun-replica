@@ -125,9 +125,9 @@ INSERT INTO test_entity_sync VALUES ('(''InOut'', -1, 51)', '(''CustomEntity02''
 CREATE INDEX test_cplx_ind ON test_entity_sync
    USING btree(a entity_sync_abs_ops);
 
-SELECT * from test_entity_sync where a = '(''InOut'', NULL, 51)';
-SELECT * from test_entity_sync where a < '(''InOut'', NULL, 51)';
-SELECT * from test_entity_sync where a > '(''InOut'', NULL, 51)';
+SELECT * from test_entity_sync where a = '(''InOut'', -1, 51)';
+SELECT * from test_entity_sync where a < '(''InOut'', -1, 51)';
+SELECT * from test_entity_sync where a > '(''InOut'', -1, 51)';
 
 
 -- clean up the example

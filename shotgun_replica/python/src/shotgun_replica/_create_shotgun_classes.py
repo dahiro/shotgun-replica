@@ -13,13 +13,21 @@ from shotgun_replica.conversions import getDBConnection, getPgType
 import os
 import logging
 
+FIELDDEFINITIONSMODULE = "_fieldDefinitions"
 
 def _createClassCode( entities, entitycode, fieldDefs, entityname ):
     classCode = ""
 
-    prettiedformat = pformat( fieldDefs, indent = 4, width = 80 ).split( "\n" )
-    indprettiedformat = ["              " + x for x in prettiedformat]
-    fieldsstring = "    shotgun_fields = %s" % ( "\n".join( indprettiedformat ) )[14:]
+    indent = len(entityname) + 3
+
+    fieldDefinitions = pformat( fieldDefs, indent = 4, width = 80 ).split("\n")
+    newCode = "\n".join( [ ( " " * indent ) + line for line in fieldDefinitions ] )[indent:]
+
+    fieldDefCode = "%s = %s\n\n" % ( entityname,
+                                     newCode )
+    
+    fieldsstring = "    shotgun_fields = %s.%s" % ( FIELDDEFINITIONSMODULE, 
+                                                    entityname )
     classString = """class %s(_ShotgunEntity):
     \"\"\"
     internal shotgun name: %s
@@ -78,7 +86,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
     pass
 
 """ % ( entitycode, entityname )
-    return classCode
+    return ( classCode, fieldDefCode )
 
 def _getDBFields( entityType ):
 
@@ -185,6 +193,18 @@ change create_shotgun_classes.py instead
 \"""
 
 from shotgun_replica._entity_mgmt import _ShotgunEntity
+from shotgun_replica import %s
+
+""" % FIELDDEFINITIONSMODULE
+
+    fieldDefModuleString = """# -*- coding: utf-8 -*-
+
+\""" 
+THIS FILE IS AUTO GENERATED
+
+DO NOT EDIT IT DIRECTLY
+change create_shotgun_classes.py instead 
+\"""
 
 """
 
@@ -209,7 +229,9 @@ from shotgun_replica._entity_mgmt import _ShotgunEntity
         if entitycode.endswith( "Connection" ):
             entityname = entitycode
 
-        moduleString += _createClassCode( entities, entitycode, fieldDefs, entityname )
+        ( classCode, fieldDefCode ) = _createClassCode( entities, entitycode, fieldDefs, entityname )
+        moduleString += classCode
+        fieldDefModuleString += fieldDefCode
 
         _createDBFields( entitycode, fieldDefs )
 
@@ -219,6 +241,12 @@ from shotgun_replica._entity_mgmt import _ShotgunEntity
     entity_file = open( entityFilename, 'w' )
     entity_file.write( moduleString )
     entity_file.close()
+
+    fieldDefFilename = os.path.join( packageDir,
+                                   '%s.py' % FIELDDEFINITIONSMODULE )
+    fieldDef_file = open( fieldDefFilename, 'w' )
+    fieldDef_file.write( fieldDefModuleString )
+    fieldDef_file.close()
 
 if __name__ == "__main__":
     main()

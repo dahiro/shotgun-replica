@@ -11,7 +11,7 @@ import logging
 import sys
 
 def intOrNone( value ):
-    if value == None:
+    if value == None or value == "-1":
         return None
     else:
         return int( value )
@@ -20,9 +20,16 @@ class Handler( object ):
     def GET( self, entityType, localID, remoteID ):
         """
         retrieve an object
+        GET-request at /[entityType]/[localID][/[remoteID]]
+        examples: /Node/-1/23  Node with remoteID=23
+                  /Project/34/23 Project with remoteID=23 and local_id=34
+                  
+        retrieve multiple objects
+        GET-request at /[entityType]?attribute=value
+        examples: /Node?project=(Project,-1,23)
         """
 
-        if localID:
+        if localID or remoteID:
             entity = self._getEntity( entityType, localID, remoteID )
 
             if entity:
@@ -111,7 +118,7 @@ def createEntity( entityClass, dataDict ):
 
 def startServer():
     urls = ( 
-        '/(\w*)\/?(.+)?\/?(.+)?', 'Handler'
+        '/(\w*)\/?([^\/]+)?\/?([^\/]+)?', 'Handler'
     )
     logging.basicConfig( level = logging.DEBUG,
                          stream = sys.stdout )

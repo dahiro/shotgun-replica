@@ -80,8 +80,8 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         return {
             "type": self.getType(),
-            "remote_id": self.getRemoteID(),
-            "local_id": self.getLocalID(),
+            "id": self.getRemoteID(),
+            "__local_id": self.getLocalID(),
         }
 
     def getPgObj( self ):

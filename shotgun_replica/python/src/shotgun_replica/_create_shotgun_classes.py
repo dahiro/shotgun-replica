@@ -216,10 +216,10 @@ change create_shotgun_classes.py instead
         print "processing %s\n" % entitycode
         fieldDefs = sg1.schema_field_read( entitycode )
 
-        theclass = connectors.getClassOfType( entitycode )
-        if theclass != None:
+        try:
+            theclass = connectors.getClassOfType( entitycode )
             localFieldDefs = theclass.shotgun_fields
-        else:
+        except ImportError:
             localFieldDefs = None
 
         if fieldDefs != localFieldDefs:

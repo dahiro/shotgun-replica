@@ -111,6 +111,13 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         logging.debug( "getField: getting field with name %s" % fieldname )
         return self.__getattribute__( fieldname )
 
+    def getRawField( self, fieldname ):
+        """
+        get raw field value and do not retrieve linked objects from db
+        """
+        logging.debug( "getField: getting field with name %s" % fieldname )
+        return object.__getattribute__(self, fieldname )
+
     def getDict( self ):
         """
         @return: returns json-like dict for use in further json-using interfaces

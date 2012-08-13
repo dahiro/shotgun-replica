@@ -269,7 +269,5 @@ def getClassOfType( entityType ):
                 return None
         else:
             return None
-    except ImportError:
-        return None
     except AttributeError:
         return None

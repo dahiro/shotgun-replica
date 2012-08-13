@@ -17,7 +17,11 @@ def getObject( entityType, remote_id = None, local_id = None ):
     @return: the object or None if object not available
     """
 
-    tableName = connectors.getClassOfType( entityType )._type
+    classObj = connectors.getClassOfType( entityType )
+    if not classObj:
+        return None
+
+    tableName = classObj._type
 
     dbc = connectors.DatabaseConnector()
 

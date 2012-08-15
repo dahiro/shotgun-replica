@@ -27,7 +27,7 @@ class DatabaseConnector( object ):
         cur = self.con.cursor()
         query = "SELECT * FROM \"%s\"" % entityType
 
-        if queryFilter != None:
+        if queryFilter != None and queryFilter != "":
             queryFilter = queryFilter.replace(";", "")
             query += " WHERE " + queryFilter
 

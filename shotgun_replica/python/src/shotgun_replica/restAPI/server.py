@@ -17,6 +17,10 @@ def intOrNone( value ):
         return int( value )
 
 class Handler( object ):
+    def _nocache(self):
+        web.header("Cache-Control", "no-cache, must-revalidate", True)
+        web.http.expires(0)
+        
     def GET( self, entityType, localID, remoteID ):
         """
         retrieve an object
@@ -32,7 +36,8 @@ class Handler( object ):
         __orderby=[attributename]   order by attribute
         __limit=1                   limit results
         """
-
+        self._nocache()
+        
         if localID or remoteID:
             entity = self._getEntity( entityType, localID, remoteID )
 
@@ -76,6 +81,8 @@ class Handler( object ):
         """
         delete an object
         """
+        self._nocache()
+        
         entity = self._getEntity( entityType, localID, remoteID )
 
         if entity:
@@ -87,6 +94,8 @@ class Handler( object ):
         """
         update an object
         """
+        self._nocache()
+        
         entity = self._getEntity( entityType, localID, remoteID )
 
         if not entity:
@@ -102,6 +111,8 @@ class Handler( object ):
         """
         create an object
         """
+        self._nocache()
+        
         entityClass = connectors.getClassOfType( entityType )
         if not entityClass: raise web.notfound()
 
@@ -142,6 +153,7 @@ def startServer():
                          stream = sys.stdout )
     global app
     app = web.application( urls, globals() )
+    
     app.run()
 
 def stopServer():

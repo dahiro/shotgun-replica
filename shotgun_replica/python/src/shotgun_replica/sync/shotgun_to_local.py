@@ -11,7 +11,7 @@ from shotgun_replica.factories import getObject
 from shotgun_replica.conversions import getConversionSg2Pg
 from shotgun_replica.entities import Task
 from shotgun_replica.sync.sync_settings import SyncomaniaSettings
-from shotgun_replica import config
+from shotgun_replica import config, factories
 
 from shotgun_api3.lib.httplib2 import Http
 import shotgun_api3
@@ -99,7 +99,7 @@ class EventSpooler( object ):
 
                     logging.debug( event )
 
-                    status = ep.process(event)
+                    status = ep.process( event )
                     status = EVENT_OK
                     if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
                         if status == EVENT_UNKNOWN:
@@ -313,11 +313,18 @@ class EventProcessor( object ):
             logging.warn( "no entity data on newly created object - deleted already?" )
             return EVENT_UNKNOWN
 
+        # check wheater already available
+        obj = factories.getObject( self.obj_type, 
+                                   remote_id = self.event['entity']['id'] )
+
+        if obj:
+            logging.warn( "entity already available in local database" )
+            return EVENT_UNKNOWN
+
         item = self.sg.find_one( self.obj_type,
                                 filters = [['id', 'is', self.event['entity']['id']]],
                                 fields = detAttribs.keys() )
 
-        # TODO: save it in couch
         if item == None:
             logging.warn( "no entity to work on" )
             return EVENT_UNKNOWN

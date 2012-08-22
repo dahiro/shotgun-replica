@@ -36,7 +36,8 @@ class DatabaseConnector( object ):
             query += " ORDER BY %s" % order
 
         if limit != None:
-            limit = limit.replace(";", "")
+            if type(limit) != type(1):
+                limit = str(limit).replace(";", "")
             query += " LIMIT %s" % str(limit)
 
         if variables != None:

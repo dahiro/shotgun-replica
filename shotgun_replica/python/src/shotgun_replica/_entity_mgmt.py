@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from shotgun_replica import entity_manipulation, conversions
+from shotgun_replica import entity_manipulation, conversions, UNKNOWN_SHOTGUN_ID
 from shotgun_replica.conversions import PostgresEntityType
 from shotgun_replica import base_entity
 
@@ -51,7 +51,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         get ID that is used in shotgun
         """
-        return self.remote_id
+        if self.remote_id:
+            return self.remote_id
+        else:
+            return UNKNOWN_SHOTGUN_ID
 
     def getLocalID( self ):
         """

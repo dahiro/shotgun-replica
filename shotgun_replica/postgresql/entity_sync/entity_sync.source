@@ -147,3 +147,11 @@ CREATE TABLE "ChangeEventsToShotgun" (
 );
 
 ALTER TABLE "ChangeEventsToShotgun" OWNER TO "shotgun_replica";
+
+CREATE TABLE "KeyValues" (
+    key VARCHAR(30) PRIMARY KEY,
+    value VARCHAR(255) NOT NULL
+);
+
+INSERT INTO "KeyValues" VALUES ('sync_settings', '{"last_eventid": 1}'); 
+ALTER TABLE "KeyValues" OWNER TO "shotgun_replica";

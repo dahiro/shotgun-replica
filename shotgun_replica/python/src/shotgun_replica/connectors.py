@@ -12,6 +12,9 @@ import logging
 import inspect
 
 class DatabaseConnector( object ):
+    con = None
+    cur = None
+
     def __new__( cls, *args, **kw ):
         """overload the __new__-Method to ensure singleton-property"""
         if not hasattr( cls, '_instance' ):

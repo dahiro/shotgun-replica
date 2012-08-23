@@ -7,13 +7,12 @@ Created on Jun 20, 2012
 '''
 import datetime
 import json
-from shotgun_replica.conversions import PostgresEntityType, getPostgresUser
 import logging
 from shotgun_replica import connectors, base_entity
 
 def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
-    updated_by = getPostgresUser()
+    updated_by = connectors.getPostgresUser()
 
     names = ["task", "updated_by"]
     values = [task, updated_by]
@@ -44,7 +43,7 @@ def createEntity( myObj ):
     """
 
 
-    src = connectors.DatabaseConnector()
+    src = connectors.DatabaseModificator()
     newID = src.add( myObj )
 
     object.__setattr__(myObj, "local_id", newID)
@@ -58,7 +57,7 @@ def changeEntity( myObj, changes ):
 
 #    myObj.reload()
 
-    src = connectors.DatabaseConnector()
+    src = connectors.DatabaseModificator()
     src.changeInDB( myObj, changes = changes )
 
     for ( key, value ) in changes.iteritems():
@@ -66,7 +65,7 @@ def changeEntity( myObj, changes ):
             changes[key] = value.strftime( "%Y-%m-%d %H:%M:%S" )
         elif type( value ) == datetime.timedelta:
             changes[key] = float( value.days ) * 24 + float( value.seconds ) / 3600
-        elif type( value ) == PostgresEntityType:
+        elif type( value ) == connectors.PostgresEntityType:
             changes[key] = value.getSgObj()
         elif isinstance( value, base_entity.ShotgunBaseEntity ):
             changes[key] = value.getSgObj()
@@ -81,7 +80,7 @@ def changeEntity( myObj, changes ):
 
 def deleteEntity( myObj ):
     """delete an entity in couchdb and shotgun"""
-    src = connectors.DatabaseConnector()
+    src = connectors.DatabaseModificator()
     src.delete(myObj)
     
     _createChangeEvent( src, "deletion", 
@@ -92,3 +91,5 @@ def deleteEntity( myObj ):
         src.changeInDB( pEntity, "tasks", myObj.getSgObj(), doRemove = True )
 
     src.con.commit()
+
+

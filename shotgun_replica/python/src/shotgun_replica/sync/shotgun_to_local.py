@@ -6,12 +6,9 @@ Created on Jun 25, 2012
 @author: bach
 '''
 
-from shotgun_replica.connectors import DatabaseConnector, getClassOfType
-from shotgun_replica.factories import getObject
-from shotgun_replica.conversions import getConversionSg2Pg
 from shotgun_replica.entities import Task
 from shotgun_replica.sync.sync_settings import SyncomaniaSettings
-from shotgun_replica import config, factories
+from shotgun_replica import config, factories, connectors
 
 from shotgun_api3.lib.httplib2 import Http
 import shotgun_api3
@@ -40,7 +37,7 @@ class EventSpooler( object ):
     def connect( self ):
         """ connect to shotgun and database """
         try:
-            self.src = DatabaseConnector()
+            self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to couchdb server. " + unicode( error ) )
             return False
@@ -150,7 +147,7 @@ class EventProcessor( object ):
             self.obj_type = mobj.group( 1 )
 
             if self.obj_type != None:
-                entityDef = getClassOfType( self.obj_type )
+                entityDef = connectors.getClassOfType( self.obj_type )
 
                 if entityDef == None:
                     logging.warning( "    Unknown entity: " + self.obj_type )
@@ -169,7 +166,7 @@ class EventProcessor( object ):
 
     def _getAttribData( self, obj_type, attrib_name ):
         if self.event['meta']['attribute_name'] not in ["id", "type", "retirement_date"]:
-            entityDef = getClassOfType( obj_type ).shotgun_fields
+            entityDef = connectors.getClassOfType( obj_type ).shotgun_fields
             if entityDef != None and entityDef.has_key( attrib_name ):
                 return entityDef[attrib_name]
             else:
@@ -191,7 +188,7 @@ class EventProcessor( object ):
             logging.warn( "no entity to work on" )
             return EVENT_UNKNOWN
 
-        entity = getObject( self.obj_type, remote_id = self.event['entity']['id'] )
+        entity = factories.getObject( self.obj_type, remote_id = self.event['entity']['id'] )
         if entity == None:
             self.src.con.rollback()
             logging.error( "object does not exist in db" + \
@@ -211,7 +208,7 @@ class EventProcessor( object ):
             values = []
             for x in names:
                 attrDef = self._getAttribData( self.obj_type, x )
-                convFunc = getConversionSg2Pg( attrDef['data_type']['value'] )
+                convFunc = connectors.getConversionSg2Pg( attrDef['data_type']['value'] )
                 values.append( convFunc( changes[x] ) )
 
             changeStr = [ "\"%s\"=%s" % ( x, "%s", ) for x in names]
@@ -278,7 +275,7 @@ class EventProcessor( object ):
         logging.debug( "   meta: " )
         logging.debug( self.event )
 
-        entity = getObject( self.event['meta']['class_name'], remote_id = self.event['meta']['id'] )
+        entity = factories.getObject( self.event['meta']['class_name'], remote_id = self.event['meta']['id'] )
         if entity == None:
 
             logging.warn( "object to delete not available" )
@@ -307,7 +304,7 @@ class EventProcessor( object ):
         logging.debug( "   meta: " )
         logging.debug( self.event )
 
-        detAttribs = getClassOfType( self.obj_type ).shotgun_fields
+        detAttribs = connectors.getClassOfType( self.obj_type ).shotgun_fields
 
         if self.event['entity'] == None:
             logging.warn( "no entity data on newly created object - deleted already?" )

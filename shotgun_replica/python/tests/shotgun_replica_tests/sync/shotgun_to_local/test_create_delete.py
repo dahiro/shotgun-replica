@@ -5,7 +5,7 @@ Created on 25.06.2012
 
 @author: bach
 '''
-from shotgun_replica.connectors import DatabaseConnector
+from shotgun_replica.connectors import DatabaseModificator
 from shotgun_replica.sync.shotgun_to_local import EventProcessor
 from shotgun_replica.factories import getObject
 from shotgun_replica.entities import Shot
@@ -27,7 +27,7 @@ class Test( unittest.TestCase ):
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_SYNC_SKRIPT,
                                    config.SHOTGUN_SYNC_KEY )
-        self.src = DatabaseConnector()
+        self.src = DatabaseModificator()
         self.ep = EventProcessor( self.src, self.sg )
 
         logging.basicConfig( level = logging.DEBUG )

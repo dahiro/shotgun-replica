@@ -64,7 +64,7 @@ class Test( unittest.TestCase ):
 
     def testProjectUpdate( self ):
 
-        url = 'http://localhost:8080/Project/74'
+        url = 'http://localhost:8080/Project/34'
 
         userdict = config.getUserDict()
         nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )

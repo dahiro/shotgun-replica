@@ -3,7 +3,7 @@ Created on Aug 23, 2012
 
 @author: bach
 '''
-from shotgun_replica import conversions, connectors
+from shotgun_replica import connectors
 import json
 
 KEY_SYNC_SETTINGS = "sync_settings"

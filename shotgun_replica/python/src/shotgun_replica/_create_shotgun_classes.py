@@ -8,7 +8,6 @@ from shotgun_api3.shotgun import Shotgun
 from pprint import pprint, pformat
 
 from shotgun_replica import connectors, config, cleanSysName
-from shotgun_replica.conversions import getDBConnection, getPgType
 
 import os
 import logging
@@ -90,7 +89,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
 
 def _getDBFields( entityType ):
 
-    conn = getDBConnection()
+    conn = connectors.getDBConnection()
     queryCur = conn.cursor()
     createCur = conn.cursor()
 
@@ -127,7 +126,7 @@ def _getDBFields( entityType ):
 
 def _createDBFields( entitycode, fieldDefs ):
 
-    conn = getDBConnection()
+    conn = connectors.getDBConnection()
     queryCur = conn.cursor()
     createCur = conn.cursor()
 
@@ -135,7 +134,7 @@ def _createDBFields( entitycode, fieldDefs ):
 
     for attribute in fieldDefs.keys():
         datatype = fieldDefs[attribute]["data_type"]["value"]
-        postgresType = getPgType( datatype )
+        postgresType = connectors.getPgType( datatype )
         if postgresType == None:
             logging.debug( "field %s.%s (%s) not handled" % ( entitycode, attribute, datatype ) )
             continue

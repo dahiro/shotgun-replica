@@ -23,7 +23,7 @@ def getObject( entityType, remote_id = None, local_id = None ):
 
     tableName = classObj._type
 
-    dbc = connectors.DatabaseConnector()
+    dbc = connectors.DatabaseModificator()
 
     filters = []
 
@@ -42,7 +42,7 @@ def getObject( entityType, remote_id = None, local_id = None ):
         return None
 
 def getObjects( entityType, filters, filterValues, orderby = None, limit = None ):
-    dbc = connectors.DatabaseConnector()
+    dbc = connectors.DatabaseModificator()
     for filterValue in filterValues:
         if isinstance( filterValue, base_entity.ShotgunBaseEntity ):
             filterValues.remove( filterValue )

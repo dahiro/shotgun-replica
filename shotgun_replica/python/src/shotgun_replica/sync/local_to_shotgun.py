@@ -5,7 +5,6 @@ import time
 import sys
 import json
 
-from shotgun_replica.conversions import PostgresEntityType
 from shotgun_replica.factories import getObject
 from shotgun_replica import config, connectors
 import shotgun_replica
@@ -30,7 +29,7 @@ class LocalDBEventSpooler( object ):
         establish a connection to local server and shotgun
         """
         try:
-            self.src = connectors.DatabaseConnector()
+            self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
             logging.error( "Unable to connect to database server. " + unicode( error ) )
             return False
@@ -169,13 +168,13 @@ class LocalDBEventSpooler( object ):
                 value = data[attribute]
 
                 if dataType == "float":
-                    value = float( value )
+                    data[attribute] = float( value )
                 elif dataType == "entity":
-                    if type( value ) == PostgresEntityType:
+                    if type( value ) == connectors.PostgresEntityType:
                         data[attribute] = value.getSgObj()
                 elif dataType == "multi_entity":
                     for sgObj in value:
-                        if type( sgObj ) == PostgresEntityType:
+                        if type( sgObj ) == connectors.PostgresEntityType:
                             sgObj = sgObj.getSgObj()
                 elif dataType == "date_time":
                     if type( value ) == type( u"" ):
@@ -213,6 +212,8 @@ class LocalDBEventSpooler( object ):
 
                 data = obj.getShotgunDict()
 
+                logging.debug( data )
+
                 newdata = self.sg.create( entity.type, data )
                 logging.debug( newdata )
 
@@ -238,13 +239,10 @@ class LocalDBEventSpooler( object ):
         """ process a delete entity event """
 
         entity = event["corr_entity"]
-        entityObj = getObject( entity.type,
-                               local_id = entity.local_id,
-                               remote_id = entity.remote_id )
 
-        if entityObj and entityObj.getRemoteID() != shotgun_replica.UNKNOWN_SHOTGUN_ID:
+        if entity and entity.remote_id != shotgun_replica.UNKNOWN_SHOTGUN_ID:
             try:
-                self.sg.delete( entity.type, entityObj.getRemoteID() )
+                self.sg.delete( entity.type, entity.remote_id )
                 return True
             except shotgun_api3.Fault, fault:
                 exception = "Error %s" % ( str( fault ) )

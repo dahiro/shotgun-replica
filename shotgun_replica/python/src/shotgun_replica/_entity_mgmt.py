@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from shotgun_replica import entity_manipulation, conversions, UNKNOWN_SHOTGUN_ID
-from shotgun_replica.conversions import PostgresEntityType
+from shotgun_replica import entity_manipulation, UNKNOWN_SHOTGUN_ID, \
+    factories, connectors
 from shotgun_replica import base_entity
 
 import logging
@@ -70,6 +70,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
 
         remote_id = self.getRemoteID()
+
+        if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
+            remote_id = connectors.getRemoteID( self.getType(), self.getLocalID() )
+
         if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
             return None
         else:
@@ -91,7 +95,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         get shortest postgres-representation of an entity
         """
-        return conversions.PostgresEntityType( self.getType(),
+        return connectors.PostgresEntityType( self.getType(),
                                                self.getLocalID(),
                                                self.getRemoteID() )
 
@@ -119,7 +123,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         get raw field value and do not retrieve linked objects from db
         """
         logging.debug( "getField: getting field with name %s" % fieldname )
-        return object.__getattribute__(self, fieldname )
+        return object.__getattribute__( self, fieldname )
 
     def getDict( self ):
         """
@@ -146,7 +150,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 pass
             elif fielddef["data_type"]["value"] == "entity":
 
-                if type( fieldvalue ) == PostgresEntityType:
+                if type( fieldvalue ) == connectors.PostgresEntityType:
                     fieldvalue = fieldvalue.getShortDict()
                 elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                     fieldvalue = fieldvalue.getShortDict()
@@ -156,7 +160,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
                 for singleFieldvalue in fieldvalue:
 
-                    if type( singleFieldvalue ) == PostgresEntityType:
+                    if type( singleFieldvalue ) == connectors.PostgresEntityType:
                         storevalue.append( singleFieldvalue.getShortDict() )
                     elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                         storevalue.append( singleFieldvalue.getShortDict() )
@@ -202,13 +206,13 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             fieldvalue = object.__getattribute__( self, dataFieldname )
             if fieldvalue == None:
                 continue
-            
+
             if ( not fielddef["editable"]["value"] ):
                 continue
-                
+
             if fielddef["data_type"]["value"] == "entity":
 
-                if type( fieldvalue ) == PostgresEntityType:
+                if type( fieldvalue ) == connectors.PostgresEntityType:
                     fieldvalue = fieldvalue.getSgObj()
                 elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                     fieldvalue = fieldvalue.getSgObj()
@@ -216,7 +220,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             elif fielddef["data_type"]["value"] == "multi_entity":
                 storevalue = []
                 for singleFieldvalue in fieldvalue:
-                    if type( singleFieldvalue ) == PostgresEntityType:
+                    if type( singleFieldvalue ) == connectors.PostgresEntityType:
                         storevalue.append( singleFieldvalue.getSgObj() )
                     elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                         storevalue.append( singleFieldvalue.getSgObj() )
@@ -273,8 +277,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 logging.debug( type( entityObj ) )
                 logging.debug( entityObj )
 
-                if type( entityObj ) == PostgresEntityType:
-                    from shotgun_replica import factories
+                if type( entityObj ) == connectors.PostgresEntityType:
                     return factories.getObject( entityObj.type,
                                                 remote_id = entityObj.remote_id,
                                                 local_id = entityObj.local_id )
@@ -285,8 +288,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
                 entityList = []
                 for entityObj in entityObjArray:
-                    if type( entityObj ) == PostgresEntityType:
-                        from shotgun_replica import factories
+                    if type( entityObj ) == connectors.PostgresEntityType:
                         entityList.append( factories.getObject( entityObj.type,
                                                                 remote_id = entityObj.remote_id,
                                                                 local_id = entityObj.local_id ) )

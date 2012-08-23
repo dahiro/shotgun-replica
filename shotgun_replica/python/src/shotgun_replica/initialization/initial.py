@@ -1,22 +1,18 @@
 
 
-from shotgun_replica.conversions import getDBConnection, getPgType, \
-    getConversionSg2Pg
 from shotgun_api3.shotgun import Shotgun
 from elefant.utilities.debug import debug
 #from elefant.utilities.config import Configuration
 from elefant.utilities import config
 from elefant.utilities.definitions import INFO, DEBUG, ERROR
-from shotgun_replica.connectors import getClassOfType
-from shotgun_replica import cleanSysName
-from shotgun_replica import _create_shotgun_classes
+from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes
 
 # leave empty for every entity to be checked
 UPDATE_ONLY = [ ]
 
 def _connect():
     conf = config.Configuration()
-    conn = getDBConnection()
+    conn = connectors.getDBConnection()
 
     cur = conn.cursor()
     sg = Shotgun( conf.get( config.CONF_SHOTGUN_URL ),
@@ -47,7 +43,7 @@ def importEntities():
 
         debug( "import entities of type " + entityType )
 
-        fieldList = getClassOfType( entityName ).shotgun_fields
+        fieldList = connectors.getClassOfType( entityName ).shotgun_fields
 
         debug( "deleting entities of type " + entityType )
 
@@ -64,7 +60,7 @@ def importEntities():
 
             for fieldName in fieldList.keys():
                 sgType = fieldList[fieldName]['data_type']['value']
-                convFunc = getConversionSg2Pg( sgType )
+                convFunc = connectors.getConversionSg2Pg( sgType )
                 if convFunc != None:
                     names.append( "\"%s\"" % fieldName )
                     if sgType == "multi_entity":

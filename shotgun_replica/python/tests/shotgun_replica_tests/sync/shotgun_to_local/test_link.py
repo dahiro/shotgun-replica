@@ -15,6 +15,7 @@ from shotgun_api3 import shotgun
 import unittest
 from shotgun_replica import config
 import logging
+from shotgun_replica.utilities import debug
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -40,7 +41,7 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 1
                                  )[0]
-        logging.debug( lastevent )
+        debug.debug( lastevent )
 
         lastID = lastevent["id"]
 
@@ -55,7 +56,7 @@ class Test( unittest.TestCase ):
                 }
 
         newOutputDict = self.sg.create( InOut().getType(), data, [] )
-        logging.debug( newOutputDict )
+        debug.debug( newOutputDict )
 
         newevents = self.sg.find( 
                                  "EventLogEntry",
@@ -66,7 +67,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         self.assertEqual( newevents[0]["event_type"], "Shotgun_CustomEntity02_New", "event not as expected" )
         self.assertEqual( newevents[1]["event_type"], "Shotgun_CustomEntity02_Change", "event not as expected" )
@@ -102,7 +103,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         self.assertEqual( len( newevents ), 5 )
         self.assertEqual( newevents[0]["event_type"], "Shotgun_CustomEntity02_sg_sink_tasks_Connection_New" )
@@ -129,7 +130,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         # unfortunately there are two events missing:
         # see: https://support.shotgunsoftware.com/requests/7380
@@ -158,7 +159,7 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 1
                                  )[0]
-        logging.debug( lastevent )
+        debug.debug( lastevent )
 
         lastID = lastevent["id"]
         data = {
@@ -168,7 +169,7 @@ class Test( unittest.TestCase ):
                 "content": "TEST TASK (delete me)"
                 }
         newTaskDict = self.sg.create( "Task", data, [] )
-        logging.debug( newTaskDict )
+        debug.debug( newTaskDict )
 
         newevents = self.sg.find( 
                                  "EventLogEntry",
@@ -179,7 +180,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
 #        self.assertEqual(len(newevents), 4, "not the same amount of events uppon creation of Task")
         self.assertEqual( newevents[0]["event_type"], "Shotgun_Task_New", "event not as expected" )
@@ -200,7 +201,7 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 100
                                  )
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         self.assertTrue( newevents[0]["event_type"] in ["Shotgun_Task_Change",
                                                        "Shotgun_Shot_Change"] )
@@ -224,7 +225,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         self.assertTrue( newevents[0]["event_type"] == "Shotgun_Task_Retirement" )
         self.assertTrue( newevents[1]["event_type"] == "Shotgun_Task_Change" )

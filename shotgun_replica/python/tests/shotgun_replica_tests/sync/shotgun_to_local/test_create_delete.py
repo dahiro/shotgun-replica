@@ -17,6 +17,7 @@ from uuid import uuid1
 import unittest
 from shotgun_replica import config
 import logging
+from shotgun_replica.utilities import debug
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -44,7 +45,7 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 1
                                  )[0]
-        logging.debug( lastevent )
+        debug.debug( lastevent )
 
         shotCode = "TEST SHOT (delete me) %s" % uuid1()
 
@@ -56,7 +57,7 @@ class Test( unittest.TestCase ):
                 "code": shotCode
                 }
         newShotDict = self.sg.create( "Shot", data, [] )
-        logging.debug( newShotDict )
+        debug.debug( newShotDict )
 
         newevents = self.sg.find( 
                                  "EventLogEntry",
@@ -67,7 +68,7 @@ class Test( unittest.TestCase ):
                                  limit = 100
                                  )
 
-        logging.debug( newevents )
+        debug.debug( newevents )
 
         self.assertEqual( newevents[0]["event_type"], "Shotgun_Shot_New", "event not as expected" )
 

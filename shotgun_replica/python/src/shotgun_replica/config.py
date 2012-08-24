@@ -22,6 +22,8 @@ DB_DATABASE = eleconfig.get( config.CONF_DB_DB )
 DB_USERNAME = eleconfig.get( config.CONF_DB_USERNAME )
 DB_PASSWORD = eleconfig.get( config.CONF_DB_PASSWORD )
 
+DEBUG_LEVEL = eleconfig.get( config.CONF_DEBUGLEVEL )
+
 SYNCSETTINGS_FILE_PATH = os.path.join( 
                                       os.path.dirname( __file__ ),
                                       "syncomania_settings.json"

@@ -9,6 +9,7 @@ import datetime
 import json
 import logging
 from shotgun_replica import connectors, base_entity
+from shotgun_replica.utilities import debug
 
 def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
@@ -31,7 +32,7 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
     query = query % ( ", ".join( names ), ", ".join( repls ) )
 
     cur = src.con.cursor()
-    logging.debug( cur.mogrify( query, values ) )
+    debug.debug( cur.mogrify( query, values ) )
     cur.execute( query, values )
     src.con.commit()
 

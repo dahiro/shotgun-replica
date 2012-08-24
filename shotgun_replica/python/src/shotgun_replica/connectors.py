@@ -14,6 +14,7 @@ import psycopg2
 import logging
 import re
 import json
+from shotgun_replica.utilities import debug
 
 con = None
 
@@ -115,9 +116,9 @@ def getPgType( shotgunType ):
     elif shotgunType == "entity_type":
         return "text"
     elif shotgunType == "summary":
-        logging.debug( "%s not yet handled" % shotgunType )
+        debug.debug( "%s not yet handled" % shotgunType )
     else:
-        logging.error( "%s not yet handled" % shotgunType )
+        debug.debug( "%s not yet handled" % shotgunType )
 
 def getPgObj( val ):
     if val != None:
@@ -282,13 +283,12 @@ class DatabaseModificator( object ):
             query += " LIMIT %s" % str( limit )
 
         if variables != None:
-            logging.debug( query )
-            logging.debug( variables )
-
-            logging.debug( cur.mogrify( query, variables ) )
+#            debug.debug( query )
+#            debug.debug( variables )
+#            debug.debug( cur.mogrify( query, variables ) )
             cur.execute( query, variables )
         else:
-            logging.debug( cur.mogrify( query ) )
+#            debug.debug( cur.mogrify( query ) )
             cur.execute( query )
 
         items = []
@@ -348,7 +348,7 @@ class DatabaseModificator( object ):
 
             query += " WHERE (" + " OR ".join( filters ) + " )"
 
-            logging.debug( cur.mogrify( query, values ) )
+            debug.debug( cur.mogrify( query, values ) )
             cur.execute( query, values )
         elif ( attribute != None ):
             values = []
@@ -363,10 +363,10 @@ class DatabaseModificator( object ):
                 else:
                     raise Exception( "unknown format for appending: %s" % type( value ) )
             elif doRemove:
-                logging.debug( "removing: " )
+                debug.debug( "removing: " )
                 fieldvalue = entity.getField( attribute )
-                logging.debug( entity.getField( attribute ) )
-                logging.debug( value )
+                debug.debug( entity.getField( attribute ) )
+                debug.debug( value )
 
                 if fieldvalue != None and len( fieldvalue ) > 0 \
                     and value in fieldvalue:
@@ -400,9 +400,9 @@ class DatabaseModificator( object ):
 
             query += " WHERE (" + " OR ".join( filters ) + " )"
 
-            logging.debug( query )
-            logging.debug( values )
-            logging.debug( cur.mogrify( query, values ) )
+            debug.debug( query )
+            debug.debug( values )
+            debug.debug( cur.mogrify( query, values ) )
             cur.execute( query, values )
         cur.close()
         self.con.commit()
@@ -449,7 +449,7 @@ class DatabaseModificator( object ):
         fieldNames = []
 
         for fieldName in item.shotgun_fields.keys():
-            logging.debug( "converting field with name %s" % fieldName )
+            debug.debug( "converting field with name %s" % fieldName )
             sgType = fieldListDef[fieldName]['data_type']['value']
             convFunc = getConversionSg2Pg( sgType )
             if convFunc != None:
@@ -478,7 +478,7 @@ class DatabaseModificator( object ):
             ", ".join( replacers ) )
 
         cur = self.con.cursor()
-        logging.debug( cur.mogrify( query, fieldValues ) )
+        debug.debug( cur.mogrify( query, fieldValues ) )
         cur.execute( query, fieldValues )
 
 
@@ -494,7 +494,7 @@ class DatabaseModificator( object ):
     def delete( self, myObj ):
         query = "DELETE FROM \"%s\" WHERE id=%s or __local_id=%s" % ( myObj.getType(), "%s", "%s" )
         cursor = self.con.cursor()
-        logging.debug( cursor.mogrify( query, ( myObj.remote_id, myObj.local_id ) ) )
+        debug.debug( cursor.mogrify( query, ( myObj.remote_id, myObj.local_id ) ) )
         cursor.execute( query, ( myObj.remote_id, myObj.local_id ) )
 
 def getDBConnection():

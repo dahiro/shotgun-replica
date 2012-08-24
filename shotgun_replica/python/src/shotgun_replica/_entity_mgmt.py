@@ -7,6 +7,7 @@ from shotgun_replica import base_entity
 import logging
 import shotgun_replica
 import datetime
+from shotgun_replica.utilities import debug
 
 class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
     """
@@ -31,6 +32,12 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                     object.__setattr__( self, names[i], data[i] )
 
         object.__init__( self, *args, **kwargs )
+
+    def __str__( self ):
+        return super( _ShotgunEntity, self ).__str__() + " %d,%d" % ( self.getLocalID(), self.getRemoteID() )
+
+    def __repr__( self, *args, **kwargs ):
+        return super( _ShotgunEntity, self ).__repr__() + " %d,%d" % ( self.getLocalID(), self.getRemoteID() )
 
     def getType( self ):
         """
@@ -115,14 +122,12 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         get field value of this object
         """
-        logging.debug( "getField: getting field with name %s" % fieldname )
         return self.__getattribute__( fieldname )
 
     def getRawField( self, fieldname ):
         """
         get raw field value and do not retrieve linked objects from db
         """
-        logging.debug( "getField: getting field with name %s" % fieldname )
         return object.__getattribute__( self, fieldname )
 
     def getDict( self ):
@@ -257,7 +262,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
     def __getattribute__( self, *args, **kwargs ):
         name = args[0]
-        logging.debug( "getting field attribute %s" % name )
 
         if name == "id":
             name = "remote_id"
@@ -274,8 +278,8 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             if fielddef[name]["data_type"]["value"] == "entity":
                 entityObj = fieldvalue
 
-                logging.debug( type( entityObj ) )
-                logging.debug( entityObj )
+                debug.debug( type( entityObj ) )
+                debug.debug( entityObj )
 
                 if type( entityObj ) == connectors.PostgresEntityType:
                     return factories.getObject( entityObj.type,
@@ -285,13 +289,15 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                     return entityObj
             elif fielddef[name]["data_type"]["value"] == "multi_entity":
                 entityObjArray = fieldvalue
-
                 entityList = []
                 for entityObj in entityObjArray:
                     if type( entityObj ) == connectors.PostgresEntityType:
-                        entityList.append( factories.getObject( entityObj.type,
-                                                                remote_id = entityObj.remote_id,
-                                                                local_id = entityObj.local_id ) )
+
+                        obj = factories.getObject( entityObj.type,
+                                                   remote_id = entityObj.remote_id,
+                                                   local_id = entityObj.local_id )
+                        if obj:
+                            entityList.append( obj )
                     else:
                         entityList.append( entityObj )
                 return entityList
@@ -318,7 +324,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         if not self.isConsistent():
 
-            logging.debug( "changing localID: %s" % str( self.getLocalID() ) )
+            debug.debug( "changing localID: %s" % str( self.getLocalID() ) )
 
             if self.getLocalID() == None or self.getLocalID() == shotgun_replica.UNKNOWN_SHOTGUN_ID:
                 # insert entity in local database
@@ -332,7 +338,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
                 self._changed_values = []
         else:
-            logging.debug( "nothing changed" )
+            debug.debug( "nothing changed" )
             return True
 
     def delete( self ):

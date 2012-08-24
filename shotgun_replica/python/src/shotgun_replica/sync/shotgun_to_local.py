@@ -18,6 +18,7 @@ import sys
 import time
 import re
 import logging
+from shotgun_replica.utilities import debug
 
 COUCHDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -64,7 +65,7 @@ class EventSpooler( object ):
     def run( self ):
         """run the event process loop"""
 
-        logging.debug( "starting event spooler" )
+        debug.debug( "starting event spooler" )
 
         while True:
             if self.connect():
@@ -91,10 +92,10 @@ class EventSpooler( object ):
                 doSleep = len( eventliste ) < ANZAHL
 
                 for event in eventliste:
-                    logging.debug( 'processing event id %d' % event['id'] )
-                    logging.debug( '     ' + event['event_type'] )
+                    debug.debug( 'processing event id %d' % event['id'] )
+                    debug.debug( '     ' + event['event_type'] )
 
-                    logging.debug( event )
+                    debug.debug( event )
 
                     status = ep.process( event )
                     status = EVENT_OK
@@ -140,7 +141,7 @@ class EventProcessor( object ):
         """ process an event """
 
         # check if we care about the event
-        logging.debug( "got event of type: " + event['event_type'] )
+        debug.debug( "got event of type: " + event['event_type'] )
         mobj = self.evtype_regexp.match( event['event_type'] )
         if mobj:
             self.event = event
@@ -182,7 +183,7 @@ class EventProcessor( object ):
 
     def _item_changed( self ):
         logging.info( "changing object of type: " + self.obj_type )
-        logging.debug( self.event )
+        debug.debug( self.event )
 
         if self.event['entity'] == None:
             logging.warn( "no entity to work on" )
@@ -200,7 +201,7 @@ class EventProcessor( object ):
             return EVENT_UNKNOWN
 
         attrib_data = self._getAttribData( self.obj_type, self.event['meta']['attribute_name'] )
-        logging.debug( attrib_data )
+        debug.debug( attrib_data )
 
         if len( attrib_data.keys() ) > 0:
             changes = self._getChanges( entity, attrib_data, self.event )
@@ -219,10 +220,10 @@ class EventProcessor( object ):
             values.append( entity.remote_id )
 
             cur = self.src.con.cursor()
-            logging.debug( cur.mogrify( query, values ) )
+            debug.debug( cur.mogrify( query, values ) )
             cur.execute( query, values )
 
-            logging.debug( "   changed finnished" )
+            debug.debug( "   changed finnished" )
         else:
             logging.warning( "   did not change unknown attrib data" )
 
@@ -272,8 +273,8 @@ class EventProcessor( object ):
 
     def _item_deleted( self ):
         logging.info( "deleting object of type: " + self.obj_type )
-        logging.debug( "   meta: " )
-        logging.debug( self.event )
+        debug.debug( "   meta: " )
+        debug.debug( self.event )
 
         entity = factories.getObject( self.event['meta']['class_name'], remote_id = self.event['meta']['id'] )
         if entity == None:
@@ -296,13 +297,13 @@ class EventProcessor( object ):
             cur = self.src.con.cursor()
             cur.execute( query, ( entity.getRemoteID(), ) )
 
-            logging.debug( "   delete finnished" )
+            debug.debug( "   delete finnished" )
             return EVENT_OK
 
     def _item_added( self ):
         logging.info( "adding object of type: " + self.obj_type )
-        logging.debug( "   meta: " )
-        logging.debug( self.event )
+        debug.debug( "   meta: " )
+        debug.debug( self.event )
 
         detAttribs = connectors.getClassOfType( self.obj_type ).shotgun_fields
 
@@ -328,9 +329,9 @@ class EventProcessor( object ):
 
         self.src.add( item )
 
-        logging.debug( "retrieved object: " )
-        logging.debug( item )
-        logging.debug( "   added finnished" )
+        debug.debug( "retrieved object: " )
+        debug.debug( item )
+        debug.debug( "   added finnished" )
 
         return EVENT_OK
 
@@ -355,11 +356,11 @@ def saveShotgunImageLocally( url ):
     """save shotgun image locally"""
     http = Http()
     [response, content] = http.request( url, "GET" )
-    logging.debug( response )
+    debug.debug( response )
     [server, path, filename] = getPathFromImageUrl( url ) #IGNORE:W0612
 
     savedAt = getAbsShotgunImagePath( path, filename )
-    logging.debug( savedAt )
+    debug.debug( savedAt )
     imagefile = open( savedAt, "w" )
     imagefile.write( content )
     imagefile.close()

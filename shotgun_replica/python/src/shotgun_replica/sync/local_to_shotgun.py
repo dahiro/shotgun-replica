@@ -11,6 +11,7 @@ import shotgun_replica
 
 import logging
 import traceback
+from shotgun_replica.utilities import debug
 
 LOCALDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -76,34 +77,29 @@ class LocalDBEventSpooler( object ):
     def _processChangeEvent( self, changeEvent ):
         """ processes change-events """
         success = False
-        logging.debug( changeEvent )
-        logging.debug( "HALLLO" )
+        debug.debug( changeEvent )
+        debug.debug( "HALLLO" )
 
         corr_entity = changeEvent["corr_entity"]
         if changeEvent["task"] == "creation":
-            logging.debug( "creating entity %s with local ID %d",
-                           corr_entity.type,
-                           corr_entity.local_id )
+            debug.debug( "creating entity %s with local ID %d" % ( corr_entity.type,
+                                                                   corr_entity.local_id ) )
             success = self._createEntity( changeEvent )
         elif changeEvent["task"] == "change":
-            logging.debug( "changing entity %s with local ID %d",
-                           corr_entity.type,
-                           corr_entity.local_id )
+            debug.debug( "changing entity %s with local ID %d" % ( corr_entity.type,
+                                                                   corr_entity.local_id ) )
             success = self._changeEntity( changeEvent )
         elif changeEvent["task"] == "deletion":
-            logging.debug( "deleting entity %s with local ID %d",
-                           corr_entity.type,
-                           corr_entity.local_id )
+            debug.debug( "deleting entity %s with local ID %d" % ( corr_entity.type,
+                                                                   corr_entity.local_id ) )
             success = self._deleteEntity( changeEvent )
         elif changeEvent["task"] == "addLink":
-            logging.debug( "adding link: %s with local ID %d",
-                           corr_entity.type,
-                           corr_entity.local_id )
+            debug.debug( "adding link: %s with local ID %d" % ( corr_entity.type,
+                                                                corr_entity.local_id ) )
             success = self._changeEntity( changeEvent )
         elif changeEvent["task"] == "removeLink":
-            logging.debug( "removing link: %s with local ID %d",
-                           corr_entity.type,
-                           corr_entity.local_id )
+            debug.debug( "removing link: %s with local ID %d" % ( corr_entity.type,
+                                                                  corr_entity.local_id ) )
             success = self._changeEntity( changeEvent )
         if success:
             self._setProcessed( changeEvent )
@@ -127,7 +123,7 @@ class LocalDBEventSpooler( object ):
             exception += "\n%s" % traceback.format_exc()
 
         cur = self.src.con.cursor()
-        logging.debug( cur.mogrify( query, ( exception, event["id"], ) ) )
+        debug.debug( cur.mogrify( query, ( exception, event["id"], ) ) )
         cur.execute( query, ( exception, event["id"], ) )
         cur.close()
 
@@ -187,7 +183,7 @@ class LocalDBEventSpooler( object ):
                 data["sg_remotely_updated_by"] = event["updated_by"].getSgObj()
 
             try:
-                logging.debug( data )
+                debug.debug( data )
                 self.sg.update( entityObj.getType(), entityObj.getRemoteID(), data )
                 return True
             except shotgun_api3.Fault, fault:
@@ -212,10 +208,10 @@ class LocalDBEventSpooler( object ):
 
                 data = obj.getShotgunDict()
 
-                logging.debug( data )
+                debug.debug( data )
 
                 newdata = self.sg.create( entity.type, data )
-                logging.debug( newdata )
+                debug.debug( newdata )
 
                 self.src.changeInDB( obj, "id", newdata["id"] )
 

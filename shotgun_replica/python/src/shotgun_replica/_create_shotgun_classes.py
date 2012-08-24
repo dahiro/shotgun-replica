@@ -115,7 +115,7 @@ def _getDBFields( entityType ):
         fieldstr = "\"__local_id\" SERIAL PRIMARY KEY"
         query = "CREATE TABLE \"%s\" (%s)" % ( entityType,
                                               fieldstr )
-        logging.debug( query )
+        debug.debug( query )
         createCur.execute( query )
 
     queryCur.close()
@@ -136,24 +136,24 @@ def _createDBFields( entitycode, fieldDefs ):
         datatype = fieldDefs[attribute]["data_type"]["value"]
         postgresType = connectors.getPgType( datatype )
         if postgresType == None:
-            logging.debug( "field %s.%s (%s) not handled" % ( entitycode, attribute, datatype ) )
+            debug.debug( "field %s.%s (%s) not handled" % ( entitycode, attribute, datatype ) )
             continue
         elif ( dbFields.has_key( attribute ) and dbFields[attribute] == postgresType ):
             pass
         elif ( dbFields.has_key( attribute ) and dbFields[attribute] != postgresType ):
-            logging.debug( "changing type %s to %s" % ( dbFields[attribute], postgresType ) )
+            debug.debug( "changing type %s to %s" % ( dbFields[attribute], postgresType ) )
             query = "ALTER TABLE \"" + entitycode + "\" ALTER COLUMN \""
             query += str( attribute )
             query += "\" TYPE "
             query += postgresType
-            logging.debug( query )
+            debug.debug( query )
             createCur.execute( query )
         else:
             query = "ALTER TABLE \"" + entitycode + "\" ADD COLUMN \""
             query += str( attribute )
             query += "\" "
             query += postgresType
-            logging.debug( query )
+            debug.debug( query )
             createCur.execute( query )
 
 #            if attribute in ["id", "name", "code"]:

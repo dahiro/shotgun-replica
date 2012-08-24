@@ -10,6 +10,7 @@ from shotgun_replica import connectors, base_entity
 import os
 import json
 import logging
+from shotgun_replica.utilities import debug
 
 def getObject( entityType, remote_id = None, local_id = None ):
     """ return object of a specific type
@@ -48,7 +49,7 @@ def getObjects( entityType, filters, filterValues, orderby = None, limit = None 
             filterValues.remove( filterValue )
             filterValues.append( filterValue.getPgObj() )
 
-    logging.debug( filterValues )
+    debug.debug( filterValues )
     resultList = dbc.getListOfEntities( entityType,
                                         filters,
                                         variables = filterValues,

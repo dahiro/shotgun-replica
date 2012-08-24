@@ -15,6 +15,7 @@ import logging
 from shotgun_replica_tests import testNodeID_1, testProjectID, testOutputID_1
 import uuid
 import sys
+from shotgun_replica.utilities import debug
 
 class Test( unittest.TestCase ):
 
@@ -50,9 +51,9 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "POST", params )
-        logging.debug( "PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION" )
-        logging.debug( response )
-        logging.debug( content )
+        debug.debug( "PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION" )
+        debug.debug( response )
+        debug.debug( content )
         self.assertEqual( response["status"], "200" )
         entityDict = json.loads( content )
         self.assertTrue( entityDict["__local_id"] != None )
@@ -86,9 +87,9 @@ class Test( unittest.TestCase ):
         http.add_credentials( 'username', 'password' )
 
         response, content = http.request( url, "PUT", params )
-        logging.debug( "PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE" )
-        logging.debug( response )
-        logging.debug( content )
+        debug.debug( "PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE" )
+        debug.debug( response )
+        debug.debug( content )
         self.assertEqual( response["status"], "200" )
         entityDict = json.loads( content )
         self.assertEqual( entityDict["sg_due"], "2012-08-08" )
@@ -118,9 +119,9 @@ class Test( unittest.TestCase ):
         url = 'http://localhost:8080/Version'
 
         response, content = http.request( url, "POST", params )
-        logging.debug( "NODE CREATION - NODE CREATION - NODE CREATION - NODE CREATION" )
-        logging.debug( response )
-        logging.debug( content )
+        debug.debug( "NODE CREATION - NODE CREATION - NODE CREATION - NODE CREATION" )
+        debug.debug( response )
+        debug.debug( content )
         self.assertEqual( response["status"], "200" )
         entityDict = json.loads( content )
         self.assertTrue( entityDict["__local_id"] != None )

@@ -17,6 +17,7 @@ from shotgun_api3 import shotgun
 import unittest
 from shotgun_replica import config
 import logging
+from shotgun_replica.utilities import debug
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -43,12 +44,12 @@ class Test( unittest.TestCase ):
                                  filter_operator = 'all',
                                  limit = 1
                                  )[0]
-        logging.debug( lastevent )
+        debug.debug( lastevent )
 
         lastID = lastevent["id"]
 
         ret = self.sg.update( "Task", testTaskID, {"sg_status_list": NEWVALUE} )
-        logging.debug( ret )
+        debug.debug( ret )
 
         newevent = self.sg.find( 
                                  "EventLogEntry",
@@ -59,7 +60,7 @@ class Test( unittest.TestCase ):
                                  limit = 1
                                  )[0]
 
-        logging.debug( newevent )
+        debug.debug( newevent )
 
         self.failUnlessEqual( newevent["entity"]["id"], testTaskID )
         self.failUnlessEqual( newevent["meta"]["new_value"], NEWVALUE )

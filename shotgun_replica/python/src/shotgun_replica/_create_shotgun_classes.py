@@ -88,7 +88,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
 """ % ( entitycode, entityname )
     return ( classCode, fieldDefCode )
 
-def _getDBFields( entityType ):
+def _getDBFields( entityType, entityName ):
 
     conn = connectors.getDBConnection()
     queryCur = conn.cursor()
@@ -118,6 +118,13 @@ def _getDBFields( entityType ):
                                               fieldstr )
         debug.debug( query )
         createCur.execute( query )
+    
+    if entityName != entityType:
+        query = "COMMENT ON TABLE \"%s\" IS 'Entity name: %s'" % ( entityType, entityName );
+    else:
+        query = "COMMENT ON TABLE \"%s\" IS ''" % ( entityType );
+
+    createCur.execute( query )
 
     queryCur.close()
     createCur.close()
@@ -125,13 +132,13 @@ def _getDBFields( entityType ):
     return allFields
 
 
-def _createDBFields( entitycode, fieldDefs ):
+def _createDBFields( entitycode, fieldDefs, entityname ):
 
     conn = connectors.getDBConnection()
     queryCur = conn.cursor()
     createCur = conn.cursor()
 
-    dbFields = _getDBFields( entitycode )
+    dbFields = _getDBFields( entitycode, entityname )
 
     for attribute in fieldDefs.keys():
         datatype = fieldDefs[attribute]["data_type"]["value"]
@@ -233,7 +240,7 @@ change create_shotgun_classes.py instead
         moduleString += classCode
         fieldDefModuleString += fieldDefCode
 
-        _createDBFields( entitycode, fieldDefs )
+        _createDBFields( entitycode, fieldDefs, entityname )
 
     packageDir = os.path.dirname( __file__ )
     entityFilename = os.path.join( packageDir,

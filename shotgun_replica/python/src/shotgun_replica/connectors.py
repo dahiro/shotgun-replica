@@ -18,7 +18,7 @@ from shotgun_replica.utilities import debug
 
 con = None
 
-IGNORE_SHOTGUN_TYPES = [ "AppWelcome" ]
+IGNORE_SHOTGUN_TYPES = [ "AppWelcome", "PermissionRuleSet", "Banner", "Icon" ]
 
 def __adapt_entity( entity ):
     return AsIs( "ROW(%s, %s, %s)::entity_sync" % ( adapt( entity.type ),

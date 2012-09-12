@@ -11,6 +11,7 @@ from shotgun_replica import connectors, config, cleanSysName
 
 import os
 import logging
+from shotgun_replica.utilities import debug
 
 FIELDDEFINITIONSMODULE = "_fieldDefinitions"
 

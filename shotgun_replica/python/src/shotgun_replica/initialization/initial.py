@@ -4,6 +4,9 @@ from shotgun_api3.shotgun import Shotgun
 from elefant.utilities import config
 from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes
 from shotgun_replica.utilities import debug
+from shotgun_replica.sync.sync_settings import SyncomaniaSettings
+from shotgun_replica.sync.shotgun_to_local import FIELD_LASTEVENTID
+import shotgun_api3
 
 # leave empty for every entity to be checked
 UPDATE_ONLY = [ ]
@@ -19,9 +22,8 @@ def _connect():
 
     return ( conn, cur, sg )
 
-def importEntities():
+def importEntities( conn, cur, sg ):
     debug.debug( "starting import Entities", debug.INFO )
-    ( conn, cur, sg ) = _connect()
 
     entities = sg.schema_entity_read()
 
@@ -77,7 +79,25 @@ def importEntities():
         conn.commit()
     debug.debug( "finnished import Entities", debug.INFO )
 
-if __name__ == "__main__":
-    _create_shotgun_classes.main()
-    importEntities()
+def setSyncSettings( sg ):
 
+    eventliste = sg.find( 
+                    "EventLogEntry",
+                    filters = [ ],
+                    fields = ['id'],
+                    order = [{'column':'id', 'direction':'desc'}],
+                    filter_operator = 'all',
+                    limit = 1 )
+
+    lastEventId = eventliste[0]["id"]
+    syncSettings = SyncomaniaSettings()
+    syncSettings.load()
+    syncSettings[FIELD_LASTEVENTID] = lastEventId
+
+if __name__ == "__main__":
+    ( conn, cur, sg ) = _connect()
+
+    _create_shotgun_classes.main()
+
+    setSyncSettings( sg )
+    importEntities( conn, cur, sg )

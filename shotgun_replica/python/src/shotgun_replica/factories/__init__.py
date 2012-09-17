@@ -49,7 +49,6 @@ def getObjects( entityType, filters, filterValues, orderby = None, limit = None 
             filterValues.remove( filterValue )
             filterValues.append( filterValue.getPgObj() )
 
-    debug.debug( filterValues )
     resultList = dbc.getListOfEntities( entityType,
                                         filters,
                                         variables = filterValues,

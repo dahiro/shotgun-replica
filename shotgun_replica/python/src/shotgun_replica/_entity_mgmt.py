@@ -278,9 +278,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             if fielddef[name]["data_type"]["value"] == "entity":
                 entityObj = fieldvalue
 
-                debug.debug( type( entityObj ) )
-                debug.debug( entityObj )
-
                 if type( entityObj ) == connectors.PostgresEntityType:
                     return factories.getObject( entityObj.type,
                                                 remote_id = entityObj.remote_id,

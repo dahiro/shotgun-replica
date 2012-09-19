@@ -175,6 +175,13 @@ def getConversionSg2Pg( sgType ):
             else:
                 return None
         return func
+    elif sgType == "checkbox":
+        def func( val ):
+            if val != None and val == 1:
+                return True
+            else:
+                return False
+        return func
     elif sgType == "multi_entity":
         def func( val ):
             if val != None:
@@ -191,7 +198,7 @@ def getConversionSg2Pg( sgType ):
             else:
                 return None
         return func
-    elif sgType in ["pivot_column", "password", "summary", "image"]:
+    elif sgType in ["pivot_column", "password", "summary"]:
         return None
     else:
         def func( val ):

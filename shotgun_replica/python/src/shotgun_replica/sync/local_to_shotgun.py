@@ -78,7 +78,6 @@ class LocalDBEventSpooler( object ):
         """ processes change-events """
         success = False
         debug.debug( changeEvent )
-        debug.debug( "HALLLO" )
 
         corr_entity = changeEvent["corr_entity"]
         if changeEvent["task"] == "creation":

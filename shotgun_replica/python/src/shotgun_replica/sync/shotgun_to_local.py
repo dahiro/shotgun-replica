@@ -339,6 +339,7 @@ class EventProcessor( object ):
 def getPathFromImageUrl( url ):
     """return path from image url"""
     url = url.replace( "https://", "" )
+    url = url.replace( "http://", "" )
     pathElements = url.split( "/" )
     server = pathElements[0]
     filename = pathElements[len( pathElements ) - 1]

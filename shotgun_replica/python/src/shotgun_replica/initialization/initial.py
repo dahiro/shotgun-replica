@@ -93,11 +93,11 @@ def setSyncSettings( sg ):
     syncSettings = SyncomaniaSettings()
     syncSettings.load()
     syncSettings[FIELD_LASTEVENTID] = lastEventId
+    syncSettings.save()
 
 if __name__ == "__main__":
     ( conn, cur, sg ) = _connect()
 
     _create_shotgun_classes.main()
-
     setSyncSettings( sg )
     importEntities( conn, cur, sg )

@@ -53,6 +53,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
             "multi_entity",
             "date_time",
             "date",
+            "image",
             "time",
             "duration",
             "text",
@@ -64,8 +65,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
             "uuid",
             "color"]:
             classString += "    %s = None\n" % field
-        elif fieldDefs[field]["data_type"]["value"] in ["image",
-            "pivot_column",
+        elif fieldDefs[field]["data_type"]["value"] in ["pivot_column",
             "password",
             "summary",
             "entity_type"]: # ??? what's that

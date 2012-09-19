@@ -146,7 +146,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 dataFieldname = "remote_id"
 
             if fielddef["data_type"]["value"] in ["pivot_column",
-                                                  "image",
                                                   "summary"]:
                 continue
 
@@ -204,7 +203,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 dataFieldname = "remote_id"
 
             if fielddef["data_type"]["value"] in ["pivot_column",
-                                                  "image",
                                                   "summary"]:
                 continue
 

@@ -35,6 +35,7 @@ class Handler( object ):
         parameters:
         __orderby=[attributename]   order by attribute
         __limit=1                   limit results
+        __details=1                 deliver detailed entity dicts instead of ids only
         """
         self._nocache()
         
@@ -73,7 +74,10 @@ class Handler( object ):
             json_entities = []
 
             for entity in entities:
-                json_entities.append( entity.getShortDict() )
+                if userData.has_key("__details"):
+                    json_entities.append( entity.getDict() )
+                else:
+                    json_entities.append( entity.getShortDict() )
 
             return json.dumps( json_entities, indent = 4 )
 

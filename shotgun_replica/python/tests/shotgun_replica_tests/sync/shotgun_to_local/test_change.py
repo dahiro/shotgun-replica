@@ -31,7 +31,7 @@ class Test( unittest.TestCase ):
         self.src = DatabaseModificator()
 
     def tearDown( self ):
-        task = getObject( "Task", testTaskID )
+        task = getObject( "Task", remote_id = testTaskID )
         changeEntity( task, {"sg_status_list": OLDVALUE} )
         self.sg.update( "Task", testTaskID, {"sg_status_list": OLDVALUE} )
 
@@ -69,7 +69,7 @@ class Test( unittest.TestCase ):
         ep = EventProcessor( self.src, self.sg )
         ep.process( newevent )
 
-        task = getObject( "Task", testTaskID )
+        task = getObject( "Task", remote_id = testTaskID )
         self.assertEqual( NEWVALUE, task.sg_status_list )
 
 if __name__ == "__main__":

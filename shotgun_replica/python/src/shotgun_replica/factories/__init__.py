@@ -12,7 +12,7 @@ import json
 import logging
 from shotgun_replica.utilities import debug
 
-def getObject( entityType, remote_id = None, local_id = None ):
+def getObject( entityType, local_id = None, remote_id = None ):
     """ return object of a specific type
     
     @return: the object or None if object not available

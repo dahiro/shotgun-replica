@@ -20,7 +20,7 @@ import uuid
 class Test( unittest.TestCase ):
 
     def setUp( self ):
-        self.testproject = getObject( Project().getType(), testProjectID )
+        self.testproject = getObject( Project().getType(), remote_id = testProjectID )
         self.eventprocessor = LocalDBEventSpooler()
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_BACKSYNC_SKRIPT,

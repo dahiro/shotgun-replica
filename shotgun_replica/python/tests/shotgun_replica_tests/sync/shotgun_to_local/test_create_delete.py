@@ -76,7 +76,7 @@ class Test( unittest.TestCase ):
             self.ep.process( newevent )
             lastID = newevent["id"]
 
-        shot = getObject( "Shot", newShotDict["id"] )
+        shot = getObject( "Shot", remote_id = newShotDict["id"] )
         self.assertEqual( type( shot ), Shot )
         self.assertEqual( shot.code, shotCode )
 
@@ -95,7 +95,7 @@ class Test( unittest.TestCase ):
             self.ep.process( newevent )
             lastID = newevent["id"]
 
-        shot = getObject( "Shot", newShotDict["id"] )
+        shot = getObject( "Shot", remote_id = newShotDict["id"] )
         self.assertEqual( shot, None )
 
 

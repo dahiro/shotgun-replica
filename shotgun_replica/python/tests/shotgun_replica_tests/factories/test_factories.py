@@ -13,7 +13,7 @@ from tests_elefant import testTaskID
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.testtask = getObject(Task().getType(), testTaskID)
+        self.testtask = getObject(Task().getType(), remote_id = testTaskID)
         pass
 
     def tearDown(self):
@@ -21,11 +21,11 @@ class Test(unittest.TestCase):
 
     def testObjectRetrieval(self):
         shotID = 1607
-        shot = getObject("Shot", shotID)
+        shot = getObject("Shot", remote_id = shotID)
         self.assertTrue(shot != None, "Shot %d does not exist?" % shotID)
         
         shotID = 1606
-        shot = getObject("Shot", shotID)
+        shot = getObject("Shot", remote_id = shotID)
         self.assertTrue(shot == None, "Shot %d does exist?" % shotID)
 
     def testLinkedFieldRetrieval(self):
@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
 
     def testDictGeneration(self):
         shotID = 1607
-        shot = getObject("Shot", shotID)
+        shot = getObject("Shot", remote_id = shotID)
         datadict = shot.getShotgunDict()
         
         self.assertTrue(datadict != None)
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
     def testAttributeRetrieval(self):
         shotID = 1607
-        shot = getObject("Shot", shotID)
+        shot = getObject("Shot", remote_id = shotID)
         self.assertEqual(type(shot.project), Project)
         self.assertEqual(type(shot.project), Project)
         

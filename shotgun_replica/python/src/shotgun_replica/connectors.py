@@ -123,10 +123,10 @@ def getPgType( shotgunType ):
 def getPgObj( val ):
     if val != None:
         if type( val ) == dict:
-            
+
             if val["type"] in IGNORE_SHOTGUN_TYPES:
                 return None
-            
+
             local_id = None
             # hier die local_id abklappern
             local_id = getLocalID( val["type"], val["id"] )
@@ -134,7 +134,9 @@ def getPgObj( val ):
             return PostgresEntityType( val["type"],
                                        local_id = local_id,
                                        remote_id = val["id"] )
-        else:
+        elif type( val ) == PostgresEntityType:
+            return val
+        elif isinstance( val, base_entity.ShotgunBaseEntity ):
             return val.getPgObj()
     else:
         return None

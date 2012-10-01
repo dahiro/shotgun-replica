@@ -64,6 +64,8 @@ def changeEntity( myObj, changes ):
     for ( key, value ) in changes.iteritems():
         if type( value ) == datetime.datetime:
             changes[key] = value.strftime( "%Y-%m-%d %H:%M:%S" )
+        if type( value ) == datetime.date:
+            changes[key] = value.strftime( "%Y-%m-%d" )
         elif type( value ) == datetime.timedelta:
             changes[key] = float( value.days ) * 24 + float( value.seconds ) / 3600
         elif type( value ) == connectors.PostgresEntityType:

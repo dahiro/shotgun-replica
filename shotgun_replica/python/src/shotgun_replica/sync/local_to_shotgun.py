@@ -174,6 +174,9 @@ class LocalDBEventSpooler( object ):
                 elif dataType == "date_time":
                     if type( value ) == type( u"" ):
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d %H:%M:%S" )
+                elif dataType == "date":
+                    if type( value ) == type( u"" ):
+                        data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d" )
                 elif dataType == "duration":
                     if type( value ) == float:
                         data[attribute] = int( value * 60 )

@@ -458,7 +458,6 @@ class DatabaseModificator( object ):
         fieldNames = []
 
         for fieldName in item.shotgun_fields.keys():
-            debug.debug( "converting field with name %s" % fieldName )
             sgType = fieldListDef[fieldName]['data_type']['value']
             convFunc = getConversionSg2Pg( sgType )
             if convFunc != None:

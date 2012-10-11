@@ -46,14 +46,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
         return self._type
 
-    def getID( self ):
-        """
-        return Shotgun-ID of this entity
-        @deprecated: now two ids used
-        """
-
-        return self.getRemoteID()
-
     def getRemoteID( self ):
         """
         get ID that is used in shotgun
@@ -304,10 +296,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             return -99999
         if isinstance( objB, base_entity.ShotgunBaseEntity ):
             if objB.getType() == self.getType():
-                if self.getRemoteID() and objB.getRemoteID():
+                if self.getRemoteID() != UNKNOWN_SHOTGUN_ID and objB.getRemoteID() != UNKNOWN_SHOTGUN_ID:
                     return cmp( self.getRemoteID(), objB.getRemoteID() )
                 else:
-                    return cmp( self.getID(), objB.getID() )
+                    return cmp( self.getLocalID(), objB.getLocalID() )
             else:
                 return cmp( self.getType(), objB.getType() )
         else:

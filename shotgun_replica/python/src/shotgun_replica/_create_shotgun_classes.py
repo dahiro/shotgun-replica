@@ -228,6 +228,8 @@ change create_shotgun_classes.py instead
             localFieldDefs = theclass.shotgun_fields
         except ImportError:
             localFieldDefs = None
+        except AttributeError:
+            localFieldDefs = None
 
         if fieldDefs != localFieldDefs:
             logging.error( "%s fielddefs differ from shotgun to local" % entitycode )

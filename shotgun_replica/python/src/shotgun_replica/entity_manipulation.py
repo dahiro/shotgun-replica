@@ -7,7 +7,6 @@ Created on Jun 20, 2012
 '''
 import datetime
 import json
-import logging
 from shotgun_replica import connectors, base_entity
 from shotgun_replica.utilities import debug
 
@@ -94,5 +93,3 @@ def deleteEntity( myObj ):
         src.changeInDB( pEntity, "tasks", myObj.getSgObj(), doRemove = True )
 
     src.con.commit()
-
-

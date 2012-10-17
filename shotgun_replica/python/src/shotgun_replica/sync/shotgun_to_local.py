@@ -8,6 +8,7 @@ Created on Jun 25, 2012
 
 from shotgun_replica.entities import Task
 from shotgun_replica.sync.sync_settings import SyncomaniaSettings
+from shotgun_replica.utilities import debug, entityNaming
 from shotgun_replica import config, factories, connectors
 
 from shotgun_api3.lib.httplib2 import Http
@@ -17,8 +18,6 @@ import os
 import sys
 import time
 import re
-import logging
-from shotgun_replica.utilities import debug
 
 COUCHDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -40,7 +39,7 @@ class EventSpooler( object ):
         try:
             self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
-            logging.error( "Unable to connect to couchdb server. " + unicode( error ) )
+            debug.debug( "Unable to connect to couchdb server. " + unicode( error ), debug.ERROR )
             return False
 
         try:
@@ -48,7 +47,7 @@ class EventSpooler( object ):
                                             config.SHOTGUN_BACKSYNC_SKRIPT,
                                             config.SHOTGUN_BACKSYNC_KEY )
         except Exception, error: #IGNORE:W0703
-            logging.error( "Unable to connect to Shotgun server. " + unicode( error ) )
+            debug.debug( "Unable to connect to Shotgun server. " + unicode( error ), debug.ERROR )
             return False
 
         self.data = SyncomaniaSettings()
@@ -56,7 +55,7 @@ class EventSpooler( object ):
             self.data.load()
 
         except Exception, error: #IGNORE:W0703
-            logging.error( "no syncomania data available yet: " + unicode( error ) )
+            debug.debug( "no syncomania data available yet: " + unicode( error ), debug.ERROR )
             return False
 
         # everything is ok
@@ -83,8 +82,8 @@ class EventSpooler( object ):
                                     limit = ANZAHL )
 
                 except Exception, error: #IGNORE:W0703
-                    logging.error( "Exception retrieving Events from Shotgun: " )
-                    logging.error( error )
+                    debug.debug( "Exception retrieving Events from Shotgun: ", debug.ERROR )
+                    debug.debug( error, debug.ERROR )
                     eventliste = []
                     time.sleep( 60 )
                     continue
@@ -101,7 +100,7 @@ class EventSpooler( object ):
                     status = EVENT_OK
                     if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
                         if status == EVENT_UNKNOWN:
-                            logging.info( "ignored unknown event: " + str( event['id'] ) )
+                            debug.debug( "ignored unknown event: " + str( event['id'] ) )
 
                         current = event['id']
 
@@ -110,7 +109,7 @@ class EventSpooler( object ):
                         self.src.con.commit()
                     else:
                         if ( not status in [ EVENT_UNKNOWN ] ):
-                            logging.info( "strange event received: " + str( event['id'] ) + \
+                            debug.debug( "strange event received: " + str( event['id'] ) + \
                                           " - " + event['event_type'] + " - " + str( status ) )
                             sys.exit( SEVERE_FAILURE )
 
@@ -121,7 +120,7 @@ class EventSpooler( object ):
 
             else:
                 sleeptime = 60
-                logging.info( "not connected - sleeping %d" % sleeptime )
+                debug.debug( "not connected - sleeping %d" % sleeptime )
                 time.sleep( sleeptime )
 
 
@@ -129,7 +128,7 @@ class EventProcessor( object ):
     """Processes change-events of shotgun"""
     def __init__( self, src, sg ):
 
-        regexp = 'Shotgun_([A-Za-z0-9]+)_(New|Change|Retirement)'
+        regexp = 'Shotgun_([A-Za-z0-9_]+)_(New|Change|Retirement)'
 
         self.evtype_regexp = re.compile( regexp )
         self.src = src
@@ -151,7 +150,7 @@ class EventProcessor( object ):
                 entityDef = connectors.getClassOfType( self.obj_type )
 
                 if entityDef == None:
-                    logging.warning( "    Unknown entity: " + self.obj_type )
+                    debug.debug( "    Unknown entity: " + self.obj_type, debug.WARNING )
                     return EVENT_UNKNOWN
 
             obj_action = mobj.group( 2 )
@@ -182,22 +181,22 @@ class EventProcessor( object ):
         return item
 
     def _item_changed( self ):
-        logging.info( "changing object of type: " + self.obj_type )
+        debug.debug( "changing object of type: " + self.obj_type )
         debug.debug( self.event )
 
         if self.event['entity'] == None:
-            logging.warn( "no entity to work on" )
+            debug.debug( "no entity to work on", debug.WARNING )
             return EVENT_UNKNOWN
 
         entity = factories.getObject( self.obj_type, remote_id = self.event['entity']['id'] )
         if entity == None:
             self.src.con.rollback()
-            logging.error( "object does not exist in db" + \
-                           str( [ self.obj_type, self.event['entity']['id'] ] ) )
+            debug.debug( "object does not exist in db" + \
+                           str( [ self.obj_type, self.event['entity']['id'] ] ), debug.ERROR )
             return EVENT_UNKNOWN
 
         if self.event['meta'] == None:
-            logging.error( "   did not change unknown attrib data" )
+            debug.debug( "   did not change unknown attrib data", debug.ERROR )
             return EVENT_UNKNOWN
 
         attrib_data = self._getAttribData( self.obj_type, self.event['meta']['attribute_name'] )
@@ -225,14 +224,14 @@ class EventProcessor( object ):
 
             debug.debug( "   changed finnished" )
         else:
-            logging.warning( "   did not change unknown attrib data" )
+            debug.debug( "   did not change unknown attrib data", debug.WARNING )
 
         return EVENT_OK
 
     def _getChanges( self, entity, attrib_data, event ):
         changes = {}
         if attrib_data['data_type']['value'] == 'multi_entity':
-            logging.info( "   changing multi-entity: " + event['meta']['attribute_name'] )
+            debug.debug( "   changing multi-entity: " + event['meta']['attribute_name'] )
             toadd = event['meta']['added']
             toremove = event['meta']['removed']
 
@@ -242,6 +241,8 @@ class EventProcessor( object ):
                 changes[event['meta']['attribute_name']] = []
 
             childlist = changes[event['meta']['attribute_name']]
+
+            removeConnEntities = []
 
             for item in toadd:
                 if item != None:
@@ -254,7 +255,28 @@ class EventProcessor( object ):
 
                     for childItem in childlist:
                         if childItem == None or ( childItem.getRemoteID() == remId and childItem.getType() == remType ):
+                            removeConnEntities.append( ( entity, childItem ) )
                             childlist.remove( childItem )
+
+            for ( entity, childItem ) in removeConnEntities:
+
+                connectionEntityName = entityNaming.getConnectionEntityName( entity.getType(),
+                                                                             event['meta']['attribute_name'] )
+                if connectionEntityName:
+                    ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entity.getType(),
+                                                                                             childItem.getType() )
+    
+                    filters = "%s=%s and %s=%s" % ( srcAttrName,
+                                                    "%s",
+                                                    dstAttrName,
+                                                    "%s"
+                                                  )
+                    filterValues = [ entity.getPgObj(), childItem.getPgObj() ]
+    
+                    delEntities = factories.getObjects( connectionEntityName, filters, filterValues )
+    
+                    for entity in delEntities:
+                        self.src.delete( entity )
 
         elif attrib_data['data_type']['value'] == 'image':
             val = self.sg.find_one( self.obj_type,
@@ -265,21 +287,21 @@ class EventProcessor( object ):
             if imageUrl != None:
                 saveShotgunImageLocally( imageUrl )
         else:
-            logging.info( "   changing attribute: " + event['meta']['attribute_name'] )
+            debug.debug( "   changing attribute: " + event['meta']['attribute_name'] )
             changes[event['meta']['attribute_name']] = event['meta']['new_value']
         return changes
 
 
 
     def _item_deleted( self ):
-        logging.info( "deleting object of type: " + self.obj_type )
+        debug.debug( "deleting object of type: " + self.obj_type )
         debug.debug( "   meta: " )
         debug.debug( self.event )
 
         entity = factories.getObject( self.event['meta']['class_name'], remote_id = self.event['meta']['id'] )
         if entity == None:
 
-            logging.warn( "object to delete not available" )
+            debug.debug( "object to delete not available", debug.WARNING )
             return EVENT_UNKNOWN
 
         else:
@@ -301,22 +323,22 @@ class EventProcessor( object ):
             return EVENT_OK
 
     def _item_added( self ):
-        logging.info( "adding object of type: " + self.obj_type )
+        debug.debug( "adding object of type: " + self.obj_type )
         debug.debug( "   meta: " )
         debug.debug( self.event )
 
         detAttribs = connectors.getClassOfType( self.obj_type ).shotgun_fields
 
         if self.event['entity'] == None:
-            logging.warn( "no entity data on newly created object - deleted already?" )
+            debug.debug( "no entity data on newly created object - deleted already?", debug.WARNING )
             return EVENT_UNKNOWN
 
         # check wheater already available
-        obj = factories.getObject( self.obj_type, 
+        obj = factories.getObject( self.obj_type,
                                    remote_id = self.event['entity']['id'] )
 
         if obj:
-            logging.warn( "entity already available in local database" )
+            debug.debug( "entity already available in local database", debug.WARNING )
             return EVENT_UNKNOWN
 
         item = self.sg.find_one( self.obj_type,
@@ -324,7 +346,7 @@ class EventProcessor( object ):
                                 fields = detAttribs.keys() )
 
         if item == None:
-            logging.warn( "no entity to work on" )
+            debug.debug( "no entity to work on", debug.WARNING )
             return EVENT_UNKNOWN
 
         self.src.add( item )
@@ -368,6 +390,4 @@ def saveShotgunImageLocally( url ):
 
 if __name__ == "__main__":
     spooler = EventSpooler()
-    logging.basicConfig( level = logging.DEBUG,
-                         stream = sys.stdout )
     spooler.run()

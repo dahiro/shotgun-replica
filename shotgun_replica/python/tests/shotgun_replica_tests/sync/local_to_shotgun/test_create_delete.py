@@ -17,11 +17,13 @@ from shotgun_api3 import shotgun
 import unittest
 import uuid
 import logging
+import shotgun_replica
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
-        self.testproject = getObject( Project().getType(), testProjectID )
+        self.testproject = getObject( Project().getType(), 
+                                      remote_id = testProjectID )
         self.eventprocessor = LocalDBEventSpooler()
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_BACKSYNC_SKRIPT,
@@ -48,7 +50,8 @@ class Test( unittest.TestCase ):
 
         shot_ret = getObject( "Shot", local_id = newshotid )
         newRemoteID = shot_ret.getRemoteID()
-        self.assertTrue( shot_ret.getRemoteID() != None )
+        self.assertTrue( newRemoteID != None and newRemoteID != shotgun_replica.UNKNOWN_SHOTGUN_ID,
+                         "Shot with local ID %d has no remote id %s" % ( newshotid, newRemoteID ) )
         self.assertTrue( shot_ret.getSgObj() != None )
 
         entity_manipulation.deleteEntity( shot_ret )

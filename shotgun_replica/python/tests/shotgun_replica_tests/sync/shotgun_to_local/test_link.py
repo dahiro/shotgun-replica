@@ -158,7 +158,8 @@ class Test( unittest.TestCase ):
         for taskID in [ testTaskID, testTaskID_2 ]:
             taskTmpObj = factories.getObject( "Task", remote_id = taskID )
             retOutputs = taskTmpObj.__getattribute__( retAttr )
-            self.assertFalse( newOutput in retOutputs )
+            if retOutputs:
+                self.assertFalse( newOutput in retOutputs )
 
         # check if Connection-Entities are deleted
 

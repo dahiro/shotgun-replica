@@ -59,7 +59,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         get ID that is used in local database (for instant object creation)
         """
-        return self.local_id
+        if self.local_id:
+            return self.local_id
+        else:
+            return UNKNOWN_SHOTGUN_ID
 
     def getSgObj( self ):
         """

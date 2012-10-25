@@ -1,15 +1,12 @@
 
 import datetime
 import shotgun_api3
-import time
-import sys
 import json
 
 from shotgun_replica.factories import getObject
 from shotgun_replica import config, connectors
 import shotgun_replica
 
-import logging
 import traceback
 from shotgun_replica.utilities import debug
 
@@ -24,7 +21,7 @@ class LocalDBEventSpooler( object ):
     cur = None
     sg = None
 
-    def connect( self ):
+    def _connect( self ):
         """ establish the connections
         
         establish a connection to local server and shotgun
@@ -32,7 +29,7 @@ class LocalDBEventSpooler( object ):
         try:
             self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
-            logging.error( "Unable to connect to database server. " + unicode( error ) )
+            debug.error( "Unable to _connect to database server. " + unicode( error ) )
             return False
 
         try:
@@ -40,7 +37,7 @@ class LocalDBEventSpooler( object ):
                                             config.SHOTGUN_BACKSYNC_SKRIPT,
                                             config.SHOTGUN_BACKSYNC_KEY )
         except Exception, error: #IGNORE:W0703
-            logging.error( "Unable to connect to Shotgun server. " + unicode( error ) )
+            debug.error( "Unable to _connect to Shotgun server. " + unicode( error ) )
             return False
 
         return True
@@ -73,6 +70,7 @@ class LocalDBEventSpooler( object ):
 
             self._processChangeEvent( eventDict )
 
+        return True
 
     def _processChangeEvent( self, changeEvent ):
         """ processes change-events """
@@ -103,18 +101,15 @@ class LocalDBEventSpooler( object ):
         if success:
             self._setProcessed( changeEvent )
 
-    def processIteration( self ):
-        if self.connect():
+    def connectAndRun( self ):
+        if self._connect():
             self.cur = self.src.con.cursor()
-            self.queryAndProcess()
+            returner = self.queryAndProcess()
             self.src.con.commit()
             self.cur.close()
-            time.sleep( 2 )
-
-    def run( self ):
-        """ starts the loop of quering, processing pausing """
-        while True:
-            self.processIteration()
+            return returner
+        else:
+            return False
 
     def _setProcessed( self, event, exception = None ):
         query = "UPDATE \"ChangeEventsToShotgun\" SET processed = 't', exception = %s WHERE id=%s"
@@ -251,9 +246,3 @@ class LocalDBEventSpooler( object ):
             self._setProcessed( event, exception = exception )
             return False
 
-
-if __name__ == "__main__":
-    spooler = LocalDBEventSpooler()
-    logging.basicConfig( level = logging.DEBUG,
-                         stream = sys.stdout )
-    spooler.run()

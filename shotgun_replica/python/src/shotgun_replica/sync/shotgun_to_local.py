@@ -15,8 +15,6 @@ from shotgun_api3.lib.httplib2 import Http
 import shotgun_api3
 
 import os
-import sys
-import time
 import re
 
 COUCHDB_FAILURE = 1
@@ -34,12 +32,12 @@ class EventSpooler( object ):
 
     src = None
 
-    def connect( self ):
-        """ connect to shotgun and database """
+    def _connect( self ):
+        """ _connect to shotgun and database """
         try:
             self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
-            debug.debug( "Unable to connect to couchdb server. " + unicode( error ), debug.ERROR )
+            debug.debug( "Unable to _connect to couchdb server. " + unicode( error ), debug.ERROR )
             return False
 
         try:
@@ -47,7 +45,7 @@ class EventSpooler( object ):
                                             config.SHOTGUN_BACKSYNC_SKRIPT,
                                             config.SHOTGUN_BACKSYNC_KEY )
         except Exception, error: #IGNORE:W0703
-            debug.debug( "Unable to connect to Shotgun server. " + unicode( error ), debug.ERROR )
+            debug.debug( "Unable to _connect to Shotgun server. " + unicode( error ), debug.ERROR )
             return False
 
         self.data = SyncomaniaSettings()
@@ -61,68 +59,58 @@ class EventSpooler( object ):
         # everything is ok
         return True
 
-    def run( self ):
+    def _processIteration(self):
+        current = self.data[FIELD_LASTEVENTID]
+        ep = EventProcessor( self.src, self.sg )
+        eventliste = []
+        ANZAHL = 100
+        
+        doRepeat = True
+        
+        while doRepeat:
+            try:
+                eventliste = self.sg.find( 
+                                "EventLogEntry",
+                                filters = [['id', 'greater_than', current]],
+                                fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
+                                order = [{'column':'id', 'direction':'asc'}],
+                                filter_operator = 'all',
+                                limit = ANZAHL )
+    
+            except Exception, error: #IGNORE:W0703
+                debug.debug( "Exception retrieving Events from Shotgun: ", debug.ERROR )
+                debug.debug( error, debug.ERROR )
+                eventliste = []
+                return False
+    
+            doRepeat = len( eventliste ) == ANZAHL
+    
+            for event in eventliste:
+                debug.debug( 'processing event id %d' % event['id'] )
+                debug.debug( '     ' + event['event_type'] )
+    
+                debug.debug( event )
+    
+                status = ep.process( event )
+                status = EVENT_OK
+                if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
+                    if status == EVENT_UNKNOWN:
+                        debug.debug( "ignored unknown event: " + str( event['id'] ) )
+    
+                    current = event['id']
+    
+                    self.data[FIELD_LASTEVENTID] = current
+                    self.data.save()
+                    self.src.con.commit()
+        return True
+
+    def connectAndRun( self ):
         """run the event process loop"""
 
-        debug.debug( "starting event spooler" )
-
-        while True:
-            if self.connect():
-                current = self.data[FIELD_LASTEVENTID]
-                ep = EventProcessor( self.src, self.sg )
-                eventliste = []
-                ANZAHL = 100
-                try:
-                    eventliste = self.sg.find( 
-                                    "EventLogEntry",
-                                    filters = [['id', 'greater_than', current]],
-                                    fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
-                                    order = [{'column':'id', 'direction':'asc'}],
-                                    filter_operator = 'all',
-                                    limit = ANZAHL )
-
-                except Exception, error: #IGNORE:W0703
-                    debug.debug( "Exception retrieving Events from Shotgun: ", debug.ERROR )
-                    debug.debug( error, debug.ERROR )
-                    eventliste = []
-                    time.sleep( 60 )
-                    continue
-
-                doSleep = len( eventliste ) < ANZAHL
-
-                for event in eventliste:
-                    debug.debug( 'processing event id %d' % event['id'] )
-                    debug.debug( '     ' + event['event_type'] )
-
-                    debug.debug( event )
-
-                    status = ep.process( event )
-                    status = EVENT_OK
-                    if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
-                        if status == EVENT_UNKNOWN:
-                            debug.debug( "ignored unknown event: " + str( event['id'] ) )
-
-                        current = event['id']
-
-                        self.data[FIELD_LASTEVENTID] = current
-                        self.data.save()
-                        self.src.con.commit()
-                    else:
-                        if ( not status in [ EVENT_UNKNOWN ] ):
-                            debug.debug( "strange event received: " + str( event['id'] ) + \
-                                          " - " + event['event_type'] + " - " + str( status ) )
-                            sys.exit( SEVERE_FAILURE )
-
-                if doSleep:
-                    sys.stdout.write( "." )
-                    self.src.con.commit()
-                    time.sleep( 2 )
-
-            else:
-                sleeptime = 60
-                debug.debug( "not connected - sleeping %d" % sleeptime )
-                time.sleep( sleeptime )
-
+        if self._connect():
+            return self._processIteration()
+        else:
+            return False
 
 class EventProcessor( object ):
     """Processes change-events of shotgun"""
@@ -387,7 +375,3 @@ def saveShotgunImageLocally( url ):
     imagefile = open( savedAt, "w" )
     imagefile.write( content )
     imagefile.close()
-
-if __name__ == "__main__":
-    spooler = EventSpooler()
-    spooler.run()

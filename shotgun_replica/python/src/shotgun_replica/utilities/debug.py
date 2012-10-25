@@ -61,6 +61,15 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
             sys.stdout.write( toprint )
             sys.stdout.flush()
 
+def error( message, nolinebreak = False, prefix = None ):
+    debug(message, messagelevel = ERROR, nolinebreak, prefix)
+
+def warn( message, nolinebreak = False, prefix = None ):
+    debug(message, messagelevel = WARNING, nolinebreak, prefix)
+
+def info( message, nolinebreak = False, prefix = None ):
+    debug(message, messagelevel = WARNING, nolinebreak, prefix)
+
 def isDebugging():
     return config.DEBUG_LEVEL < INFO
 

@@ -46,7 +46,7 @@ class Test( unittest.TestCase ):
         self.assertTrue( shot_ret != None )
         self.assertTrue( shot_ret.getSgObj() == None )
 
-        self.eventprocessor.processIteration()
+        self.eventprocessor.connectAndRun()
 
         shot_ret = getObject( "Shot", local_id = newshotid )
         newRemoteID = shot_ret.getRemoteID()
@@ -68,7 +68,7 @@ class Test( unittest.TestCase ):
                                limit = 100
                                )
         self.assertEqual( len( newshot ), 1 )
-        self.eventprocessor.processIteration()
+        self.eventprocessor.connectAndRun()
 
         newshot = self.sg.find( 
                                "Shot",

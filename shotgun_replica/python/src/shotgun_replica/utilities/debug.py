@@ -9,20 +9,22 @@ import sys
 import traceback
 import pprint
 
-TEMPORARY=0
-PARANOID=2
-DEBUG=4
-INFO=8
-WARNING=12
-ERROR=16
-EXCEPTION=20
+TEMPORARY = 0
+PARANOID = 2
+DEBUG = 4
+INFO = 8
+WARNING = 12
+ERROR = 16
+EXCEPTION = 20
 
-IDS={PARANOID:  ["PARANOID  ", 0],
-     DEBUG:     ["DEBUG     ", 1],
-     INFO:      ["INFO      ", 2],
-     WARNING:   ["WARNING   ", 3],
-     ERROR:     ["ERROR     ", 4],
-     EXCEPTION: ["EXCEPTION ", 5]}
+IDS = { 
+        PARANOID:  ["PARANOID  ", 0],
+        DEBUG:     ["DEBUG     ", 1],
+        INFO:      ["INFO      ", 2],
+        WARNING:   ["WARNING   ", 3],
+        ERROR:     ["ERROR     ", 4],
+        EXCEPTION: ["EXCEPTION ", 5]
+}
 
 def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
     if messagelevel >= config.DEBUG_LEVEL:
@@ -62,13 +64,13 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
             sys.stdout.flush()
 
 def error( message, nolinebreak = False, prefix = None ):
-    debug(message, messagelevel = ERROR, nolinebreak, prefix)
+    debug( message, messagelevel = ERROR, nolinebreak = nolinebreak, prefix = prefix )
 
 def warn( message, nolinebreak = False, prefix = None ):
-    debug(message, messagelevel = WARNING, nolinebreak, prefix)
+    debug( message, messagelevel = WARNING, nolinebreak = nolinebreak, prefix = prefix )
 
 def info( message, nolinebreak = False, prefix = None ):
-    debug(message, messagelevel = WARNING, nolinebreak, prefix)
+    debug( message, messagelevel = WARNING, nolinebreak = nolinebreak, prefix = prefix )
 
 def isDebugging():
     return config.DEBUG_LEVEL < INFO

@@ -10,7 +10,7 @@ from shotgun_api3.lib import httplib2
 import urllib
 import json
 import datetime
-from shotgun_replica import config, factories, entities
+from shotgun_replica import config, factories
 import logging
 from shotgun_replica_tests import testNodeID_1, testProjectID, testOutputID_1
 import uuid
@@ -65,7 +65,7 @@ class Test( unittest.TestCase ):
 
     def testProjectUpdate( self ):
 
-        url = 'http://localhost:8080/Project/34'
+        url = 'http://localhost:8080/Project/-1/%d' % testProjectID
 
         userdict = config.getUserDict()
         nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )

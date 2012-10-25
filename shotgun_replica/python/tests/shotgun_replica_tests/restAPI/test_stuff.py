@@ -6,28 +6,23 @@ Created on 25.06.2012
 @author: bach
 '''
 import unittest
-from shotgun_api3.lib import httplib2
-import urllib
 import json
 import datetime
 from shotgun_replica import config, factories
-import logging
 from shotgun_replica_tests import testNodeID_1, testProjectID, testOutputID_1
 import uuid
-import sys
 from shotgun_replica.utilities import debug
+from shotgun_replica.restAPI import server
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
-        pass
+        self.serverHandler = server.Handler()
 
     def tearDown( self ):
         pass
 
     def testProjectCreation( self ):
-
-        url = 'http://localhost:8080/Project'
 
         userdict = config.getUserDict()
 
@@ -42,30 +37,14 @@ class Test( unittest.TestCase ):
                        "created_at": nowstr
                        }
 
-        params = urllib.urlencode( {
-          'data': json.dumps( projectData ),
-          'lastName': 'Doe'
-        } )
-
-        http = httplib2.Http()
-        http.add_credentials( 'username', 'password' )
-
-        response, content = http.request( url, "POST", params )
-        debug.debug( "PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION - PROJECT CREATION" )
-        debug.debug( response )
-        debug.debug( content )
-        self.assertEqual( response["status"], "200" )
-        entityDict = json.loads( content )
+        entityDictStr = self.serverHandler.POST( "Project", None, None, testdata = projectData )
+        entityDict = json.loads( entityDictStr )
+        debug.debug( entityDict )
         self.assertTrue( entityDict["__local_id"] != None )
-        
-        url = 'http://localhost:8080/Project/%d' % entityDict["__local_id"]
-        response, content = http.request( url, "DELETE" )
-        self.assertEqual( response["status"], "200" )
-        
+
+        entityDict = self.serverHandler.DELETE( "Project", entityDict["__local_id"], None, testdata = "dummy" )
 
     def testProjectUpdate( self ):
-
-        url = 'http://localhost:8080/Project/-1/%d' % testProjectID
 
         userdict = config.getUserDict()
         nowstr = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
@@ -73,24 +52,11 @@ class Test( unittest.TestCase ):
         projectData = {
                        "sg_status": "Active",
                        "sg_due": "2012-08-08",
-#                       "updated_by": userdict,
-#                       "updated_at": nowstr,
+                       "updated_by": userdict,
+                       "updated_at": nowstr,
                        }
 
-        putData = {
-                   "data": json.dumps( projectData )
-                   }
-
-        params = urllib.urlencode( putData )
-
-        http = httplib2.Http()
-        http.add_credentials( 'username', 'password' )
-
-        response, content = http.request( url, "PUT", params )
-        debug.debug( "PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE PROJECT UPDATE" )
-        debug.debug( response )
-        debug.debug( content )
-        self.assertEqual( response["status"], "200" )
+        content = self.serverHandler.PUT( "Project", None, testProjectID, testdata = projectData )
         entityDict = json.loads( content )
         self.assertEqual( entityDict["sg_due"], "2012-08-08" )
 
@@ -107,31 +73,8 @@ class Test( unittest.TestCase ):
                        "project": project.getSgObj(),
                        }
 
-        putData = {
-                   "data": json.dumps( versionData )
-                   }
-
-        params = urllib.urlencode( putData )
-
-        http = httplib2.Http()
-        http.add_credentials( 'username', 'password' )
-
-        url = 'http://localhost:8080/Version'
-
-        response, content = http.request( url, "POST", params )
-        debug.debug( "NODE CREATION - NODE CREATION - NODE CREATION - NODE CREATION" )
-        debug.debug( response )
-        debug.debug( content )
-        self.assertEqual( response["status"], "200" )
+        content = self.serverHandler.POST( "Version", None, None, versionData )
         entityDict = json.loads( content )
         self.assertTrue( entityDict["__local_id"] != None )
-        
-        url = 'http://localhost:8080/Version/%d' % entityDict["__local_id"]
-        response, content = http.request( url, "DELETE" )
-        self.assertEqual( response["status"], "200" )
 
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
-    logging.basicConfig( level = logging.DEBUG, stream = sys.stdout )
-    unittest.main()
+        content = self.serverHandler.DELETE( "Version", entityDict["__local_id"], None, testdata = "dummy" )

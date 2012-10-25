@@ -21,7 +21,7 @@ class Handler( object ):
         web.header("Cache-Control", "no-cache, must-revalidate", True)
         web.http.expires(0)
         
-    def GET( self, entityType, localID, remoteID ):
+    def GET( self, entityType, localID, remoteID, testdata = None  ):
         """
         retrieve an object
         GET-request at /[entityType]/[localID][/[remoteID]]
@@ -37,7 +37,8 @@ class Handler( object ):
         __limit=1                   limit results
         __details=1                 deliver detailed entity dicts instead of ids only
         """
-        self._nocache()
+        if testdata == None:
+            self._nocache()
         
         if localID or remoteID:
             entity = self._getEntity( entityType, localID, remoteID )
@@ -48,7 +49,10 @@ class Handler( object ):
                 return web.notfound()
         else:
 
-            userData = web.input()
+            if testdata:
+                userData = testdata
+            else:
+                userData = web.input()
 
             filters = []
             filterValues = []
@@ -81,46 +85,54 @@ class Handler( object ):
 
             return json.dumps( json_entities, indent = 4 )
 
-    def DELETE( self, entityType, localID, remoteID ):
+    def DELETE( self, entityType, localID, remoteID, testdata = None  ):
         """
         delete an object
         """
-        self._nocache()
+        if testdata == None:
+            self._nocache()
         
         entity = self._getEntity( entityType, localID, remoteID )
 
         if entity:
-            return entity.delete()
+            entity.delete()
+            return web.ok()
         else:
             return web.notfound()
 
-    def PUT( self, entityType, localID, remoteID ):
+    def PUT( self, entityType, localID, remoteID, testdata = None  ):
         """
         update an object
         """
-        self._nocache()
         
         entity = self._getEntity( entityType, localID, remoteID )
 
         if not entity:
             return web.notfound()
 
-        newData = self._parseInput()
+        if testdata != None:
+            newData = testdata
+        else:
+            self._nocache()
+            newData = self._parseInput()
 
         entity = updateEntity( entity, newData )
 
         return json.dumps( entity.getDict() )
 
-    def POST( self, entityType, localID, remoteID ):
+    def POST( self, entityType, localID, remoteID, testdata = None ):
         """
         create an object
         """
-        self._nocache()
         
         entityClass = connectors.getClassOfType( entityType )
         if not entityClass: raise web.notfound()
 
-        data = self._parseInput()
+        if testdata != None:
+            data = testdata
+        else:
+            self._nocache()
+            data = self._parseInput()
 
         entity = createEntity( entityClass, data )
         return json.dumps( entity.getDict() )

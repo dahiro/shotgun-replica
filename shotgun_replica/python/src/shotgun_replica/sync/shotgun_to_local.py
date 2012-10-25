@@ -299,8 +299,9 @@ class EventProcessor( object ):
                 if entity.entity != None:
                     pEntity = entity.entity
                     self.src.changeInDB( pEntity, attribute = "tasks", value = entity, doRemove = True )
-                elif entity["task_template"] != None:
-                    pEntity = entity["task_template"]
+                elif entity.task_template != None:
+                    pEntity = entity.task_template
+                    self.src.changeInDB( pEntity, attribute = "tasks", value = entity, doRemove = True )
 
             query = "DELETE FROM \"%s\" WHERE id=%s" % ( self.event['meta']['class_name'],
                                                         "%s" )

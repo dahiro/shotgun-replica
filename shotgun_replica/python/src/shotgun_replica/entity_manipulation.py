@@ -83,7 +83,7 @@ def changeEntity( myObj, changes ):
 def deleteEntity( myObj ):
     """delete an entity in couchdb and shotgun"""
     src = connectors.DatabaseModificator()
-    src.delete(myObj)
+    src.changeInDB(myObj, "__retired", True)
     
     _createChangeEvent( src, "deletion", 
                         corr_entity = myObj.getPgObj())

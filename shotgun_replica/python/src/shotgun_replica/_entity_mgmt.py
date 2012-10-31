@@ -4,7 +4,6 @@ from shotgun_replica import entity_manipulation, UNKNOWN_SHOTGUN_ID, \
     factories, connectors
 from shotgun_replica import base_entity
 
-import logging
 import shotgun_replica
 import datetime
 from shotgun_replica.utilities import debug
@@ -185,14 +184,13 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
 
         dataDict = {}
-        removeKeys = [ "type", "id", "__local_id" ]
+        removeKeys = [ "type", "id", "__local_id", "current_user_favorite" ]
 
         for ( fieldname, fielddef ) in self.shotgun_fields.iteritems():
             if fieldname in removeKeys:
                 continue
 
             dataFieldname = fieldname
-
 
             if fieldname == "id":
                 dataFieldname = "remote_id"
@@ -209,19 +207,20 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 continue
 
             if fielddef["data_type"]["value"] == "entity":
-
-                if type( fieldvalue ) == connectors.PostgresEntityType:
+                if type( fieldvalue ) == connectors.PostgresEntityType or \
+                        isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
                     fieldvalue = fieldvalue.getSgObj()
-                elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
-                    fieldvalue = fieldvalue.getSgObj()
+                    if fieldvalue == None:
+                        continue
 
             elif fielddef["data_type"]["value"] == "multi_entity":
                 storevalue = []
                 for singleFieldvalue in fieldvalue:
-                    if type( singleFieldvalue ) == connectors.PostgresEntityType:
-                        storevalue.append( singleFieldvalue.getSgObj() )
-                    elif isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
-                        storevalue.append( singleFieldvalue.getSgObj() )
+                    if ( type( singleFieldvalue ) == connectors.PostgresEntityType ) \
+                            or isinstance( fieldvalue, base_entity.ShotgunBaseEntity ):
+                        valToAppend = singleFieldvalue.getSgObj()
+                        if valToAppend != None:
+                            storevalue.append( valToAppend )
                 fieldvalue = storevalue
 
             elif fielddef["data_type"]["value"] == "date_time":
@@ -235,7 +234,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             dataDict[fieldname] = fieldvalue
 
         return dataDict
-
 
     def loadFromDict( self, dataDict ):
         """
@@ -337,6 +335,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
 
         entity_manipulation.deleteEntity( self )
         return None
+
+    def isRetired( self ):
+        return self.__retired
 
     def isConsistent( self ):
         """ checks weather there are any changed values 

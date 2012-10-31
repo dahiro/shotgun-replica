@@ -16,7 +16,6 @@ from shotgun_api3 import shotgun
 from uuid import uuid1
 import unittest
 from shotgun_replica import config
-import logging
 from shotgun_replica.utilities import debug
 
 NEWVALUE = "rdy"
@@ -30,8 +29,6 @@ class Test( unittest.TestCase ):
                                    config.SHOTGUN_SYNC_KEY )
         self.src = DatabaseModificator()
         self.ep = EventProcessor( self.src, self.sg )
-
-        logging.basicConfig( level = logging.DEBUG )
 
     def tearDown( self ):
         pass

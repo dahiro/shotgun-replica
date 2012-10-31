@@ -7,7 +7,6 @@ import json
 
 from shotgun_replica import connectors, factories
 import urlparse
-import logging
 import sys
 
 def intOrNone( value ):
@@ -165,8 +164,6 @@ def startServer():
     urls = ( 
         '/(\w*)\/?([^\/]+)?\/?([^\/]+)?', 'Handler'
     )
-    logging.basicConfig( level = logging.DEBUG,
-                         stream = sys.stdout )
     global app
     app = web.application( urls, globals() )
     

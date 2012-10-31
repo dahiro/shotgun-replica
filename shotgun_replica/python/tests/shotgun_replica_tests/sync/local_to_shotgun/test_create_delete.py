@@ -16,7 +16,6 @@ from shotgun_api3 import shotgun
 
 import unittest
 import uuid
-import logging
 import shotgun_replica
 
 class Test( unittest.TestCase ):
@@ -28,7 +27,6 @@ class Test( unittest.TestCase ):
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_BACKSYNC_SKRIPT,
                                    config.SHOTGUN_BACKSYNC_KEY )
-        logging.basicConfig( level = logging.DEBUG )
 
     def tearDown( self ):
         pass

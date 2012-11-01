@@ -56,6 +56,7 @@ class LocalDBEventSpooler( object ):
             " NOT processed ORDER BY created ASC, id ASC"
         self.cur.execute( query )
         descriptions = self.cur.description
+        allOk = True
         for result in self.cur:
             eventDict = {}
 
@@ -68,9 +69,11 @@ class LocalDBEventSpooler( object ):
                 else:
                     eventDict[descriptions[i][0]] = result[i]
 
-            self._processChangeEvent( eventDict )
+            stateOk = self._processChangeEvent( eventDict )
+            if not stateOk:
+                allOk = False
 
-        return True
+        return allOk
 
     def _processChangeEvent( self, changeEvent ):
         """ processes change-events """
@@ -100,6 +103,9 @@ class LocalDBEventSpooler( object ):
             success = self._changeEntity( changeEvent )
         if success:
             self._setProcessed( changeEvent )
+            return True
+        else:
+            return False
 
     def connectAndRun( self ):
         if self._connect():
@@ -171,7 +177,7 @@ class LocalDBEventSpooler( object ):
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d %H:%M:%S" )
                 elif dataType == "date":
                     if type( value ) == type( u"" ):
-                        data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d" )
+                        data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d" ).date()
                 elif dataType == "duration":
                     if type( value ) == float:
                         data[attribute] = int( value * 60 )
@@ -196,7 +202,8 @@ class LocalDBEventSpooler( object ):
         entity = event["corr_entity"]
         if type( entity.local_id ) == type( 1 ):
             try:
-                obj = getObject( entity.type, local_id = entity.local_id )
+                obj = getObject( entity.type, local_id = entity.local_id, includeRetireds = True )
+
                 if not obj:
                     exception = "Error %s with local_id %d does not exist anymore" % ( entity.type,
                                                                                        entity.local_id )
@@ -232,10 +239,13 @@ class LocalDBEventSpooler( object ):
         """ process a delete entity event """
 
         entity = event["corr_entity"]
+        obj = getObject( entity.type, local_id = entity.local_id, includeRetireds = True )
+        
 
-        if entity and entity.remote_id != shotgun_replica.UNKNOWN_SHOTGUN_ID:
+        if obj and obj.getRemoteID() != shotgun_replica.UNKNOWN_SHOTGUN_ID:
             try:
-                self.sg.delete( entity.type, entity.remote_id )
+                self.src.delete( entity )
+                self.sg.delete( entity.type, obj.getRemoteID() )
                 return True
             except shotgun_api3.Fault, fault:
                 exception = "Error %s" % ( str( fault ) )

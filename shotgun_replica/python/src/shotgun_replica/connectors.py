@@ -6,12 +6,11 @@ Created on 21.05.2012
 @author: bach
 '''
 
-from shotgun_replica import config, base_entity
+from shotgun_replica import config, base_entity, UNKNOWN_SHOTGUN_ID
 import shotgun_replica
 
 from psycopg2.extensions import adapt, AsIs, register_adapter
 import psycopg2
-import logging
 import re
 import json
 from shotgun_replica.utilities import debug
@@ -47,8 +46,8 @@ def __cast_entities( value, cur ):
 
         return ret
     else:
-        logging.error( type( value ) )
-        logging.error( value )
+        debug.error( type( value ) )
+        debug.error( value )
         raise InterfaceError( "bad entity representation: %r" % value )
 
 def __cast_entity( value, cur ):
@@ -235,9 +234,15 @@ class PostgresEntityType( object ):
         remote_id = self.remote_id
         if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
             remote_id = getRemoteID( self.type, self.local_id )
+        
+        if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
+            return None
+        else:
+            return {"id": remote_id,
+                    "type": self.type}
 
-        return {"id": remote_id,
-                "type": self.type}
+    def getType( self ):
+        return self.type
 
     def getShortDict( self ):
         """
@@ -327,14 +332,17 @@ class DatabaseModificator( object ):
             entityLocalID = entity.getLocalID()
 
         cur = self.con.cursor()
+        classOfType = getClassOfType( entityType )
 
         if changes != None:
             keys = changes.keys()
             values = []
             for attr in keys:
-                sgType = getClassOfType( entityType ).shotgun_fields[attr]["data_type"]["value"]
+                convFunc = None
+                if classOfType.shotgun_fields.has_key( attr ):
+                    sgType = classOfType.shotgun_fields[attr]["data_type"]["value"]
+                    convFunc = getConversionSg2Pg( sgType )
 
-                convFunc = getConversionSg2Pg( sgType )
                 if convFunc != None:
                     values.append( convFunc( changes[attr] ) )
                 else:
@@ -347,11 +355,11 @@ class DatabaseModificator( object ):
             query += ", ".join( changeArr )
 
             filters = []
-            if entityLocalID != None:
+            if entityLocalID != None and entityLocalID != UNKNOWN_SHOTGUN_ID:
                 filters.append( "__local_id=%s" )
                 values.append( entityLocalID )
 
-            if entityID != None:
+            if entityID != None and entityID != UNKNOWN_SHOTGUN_ID:
                 filters.append( "id=%s" )
                 values.append( entityID )
 
@@ -390,8 +398,10 @@ class DatabaseModificator( object ):
                 query = "UPDATE \"%s\" SET " % entityType
                 query += "\"%s\" = %s" % ( attribute, "%s" )
 
-                sgType = getClassOfType( entityType ).shotgun_fields[attribute]["data_type"]["value"]
-                convFunc = getConversionSg2Pg( sgType )
+                convFunc = None
+                if classOfType.shotgun_fields.has_key( attribute ):
+                    sgType = classOfType.shotgun_fields[attribute]["data_type"]["value"]
+                    convFunc = getConversionSg2Pg( sgType )
 
                 if convFunc != None:
                     values = [convFunc( value ), ]
@@ -399,11 +409,11 @@ class DatabaseModificator( object ):
                     values = [value, ]
 
             filters = []
-            if entityLocalID != None:
+            if entityLocalID != None and entityLocalID != UNKNOWN_SHOTGUN_ID:
                 filters.append( "__local_id=%s" )
                 values.append( entityLocalID )
 
-            if entityID != None:
+            if entityID != None and entityID != UNKNOWN_SHOTGUN_ID:
                 filters.append( "id=%s" )
                 values.append( entityID )
 

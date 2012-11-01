@@ -52,6 +52,17 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
 
         if isParanoiing():
             stack = traceback.extract_stack()
+            toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 4][0],
+                                                             stack[len( stack ) - 4][1],
+                                                             stack[len( stack ) - 4][2] )
+            toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 3][0],
+                                                             stack[len( stack ) - 3][1],
+                                                             stack[len( stack ) - 3][2] )
+            toprint += "  File \"%s\", line %d, in %s\n\n" % ( stack[len( stack ) - 2][0],
+                                                               stack[len( stack ) - 2][1],
+                                                               stack[len( stack ) - 2][2] )
+        elif isDebugging():
+            stack = traceback.extract_stack()
             toprint += "  File \"%s\", line %d, in %s\n\n" % ( stack[len( stack ) - 2][0],
                                                                stack[len( stack ) - 2][1],
                                                                stack[len( stack ) - 2][2] )
@@ -62,6 +73,9 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
         else:
             sys.stdout.write( toprint )
             sys.stdout.flush()
+
+def paranoid( message, nolinebreak = False, prefix = None ):
+    debug( message, messagelevel = PARANOID, nolinebreak = nolinebreak, prefix = prefix )
 
 def error( message, nolinebreak = False, prefix = None ):
     debug( message, messagelevel = ERROR, nolinebreak = nolinebreak, prefix = prefix )

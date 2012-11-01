@@ -10,7 +10,6 @@ from pprint import pprint, pformat
 from shotgun_replica import connectors, config, cleanSysName
 
 import os
-import logging
 from shotgun_replica.utilities import debug
 
 FIELDDEFINITIONSMODULE = "_fieldDefinitions"
@@ -139,6 +138,9 @@ def _createDBFields( entitycode, fieldDefs, entityname ):
     createCur = conn.cursor()
 
     dbFields = _getDBFields( entitycode, entityname )
+    if not dbFields.has_key("__retired"):
+        query = "ALTER TABLE \"%s\" ADD COLUMN \"__retired\" BOOLEAN DEFAULT 'f'" % entitycode
+        createCur.execute( query )
 
     for attribute in fieldDefs.keys():
         datatype = fieldDefs[attribute]["data_type"]["value"]
@@ -232,7 +234,7 @@ change create_shotgun_classes.py instead
             localFieldDefs = None
 
         if fieldDefs != localFieldDefs:
-            logging.error( "%s fielddefs differ from shotgun to local" % entitycode )
+            debug.error( "%s fielddefs differ from shotgun to local" % entitycode )
 
         entityname = cleanSysName( entities[entitycode]["name"]["value"] )
         if entitycode.endswith( "Connection" ):

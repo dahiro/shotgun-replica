@@ -16,7 +16,6 @@ from shotgun_api3 import shotgun
 
 import unittest
 from shotgun_replica import config
-import logging
 from shotgun_replica.utilities import debug
 
 NEWVALUE = "rdy"

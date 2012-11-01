@@ -8,6 +8,9 @@ Created on Jul 4, 2012
 
 from shotgun_replica.factories import keyvalues
 
+FIELD_LASTEVENTID = "last_eventid"
+FIELD_CURRENT_SYNCDAEMON_ID = "sync_daemon_id"
+
 class SyncomaniaSettings( dict ):
     def save( self ):
         keyvalues.setValue( keyvalues.KEY_SYNC_SETTINGS, self )

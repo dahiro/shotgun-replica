@@ -16,6 +16,7 @@ import shotgun_api3
 
 import os
 import re
+from shotgun_replica.sync import sync_settings
 
 COUCHDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -24,8 +25,6 @@ SEVERE_FAILURE = 250
 EVENT_OK = 0
 EVENT_ERROR = 1
 EVENT_UNKNOWN = 2
-
-FIELD_LASTEVENTID = "last_eventid"
 
 class EventSpooler( object ):
     """Continuously spools events from shotgun"""
@@ -60,7 +59,7 @@ class EventSpooler( object ):
         return True
 
     def _processIteration(self):
-        current = self.data[FIELD_LASTEVENTID]
+        current = self.data[sync_settings.FIELD_LASTEVENTID]
         ep = EventProcessor( self.src, self.sg )
         eventliste = []
         ANZAHL = 100
@@ -99,7 +98,7 @@ class EventSpooler( object ):
     
                     current = event['id']
     
-                    self.data[FIELD_LASTEVENTID] = current
+                    self.data[sync_settings.FIELD_LASTEVENTID] = current
                     self.data.save()
                     self.src.con.commit()
         return True

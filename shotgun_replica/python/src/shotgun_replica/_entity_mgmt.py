@@ -7,6 +7,7 @@ from shotgun_replica import base_entity
 import shotgun_replica
 import datetime
 from shotgun_replica.utilities import debug
+from shotgun_replica.connectors import PostgresEntityType
 
 class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
     """
@@ -246,6 +247,13 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 continue
 
             fieldvalue = dataDict[ fieldname ]
+            if type( fieldvalue ) == dict:
+                try:
+                    fieldvalue = PostgresEntityType( fieldvalue["type"],
+                                                     fieldvalue["__local_id"],
+                                                     fieldvalue["id"] )
+                except KeyError:
+                    pass
 
             self.__setattr__( fieldname, fieldvalue )
 

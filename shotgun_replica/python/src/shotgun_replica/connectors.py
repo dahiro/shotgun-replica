@@ -128,7 +128,12 @@ def getPgObj( val ):
 
             local_id = None
             # hier die local_id abklappern
-            local_id = getLocalID( val["type"], val["id"] )
+            if val.has_key("__local_id"):
+                local_id = val["__local_id"]
+            
+            if local_id == None or local_id==UNKNOWN_SHOTGUN_ID:
+                # hier die local_id abklappern
+                local_id = getLocalID( val["type"], val["id"] )
 
             return PostgresEntityType( val["type"],
                                        local_id = local_id,

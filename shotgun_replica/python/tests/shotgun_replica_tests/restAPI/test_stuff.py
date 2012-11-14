@@ -11,7 +11,6 @@ import datetime
 from shotgun_replica import config, factories
 from shotgun_replica_tests import testNodeID_1, testProjectID, testOutputID_1
 import uuid
-from shotgun_replica.utilities import debug
 from shotgun_replica.restAPI import server
 from shotgun_replica.sync.local_to_shotgun import LocalDBEventSpooler
 
@@ -50,10 +49,10 @@ class Test( unittest.TestCase ):
         self.assertTrue( newObj.getRemoteID() )
 
         self.serverHandler.DELETE( "Project", entityDict["__local_id"], None, testdata = "dummy" )
-        
+
         newObj = factories.getObject( "Project", local_id = entityDict["__local_id"] )
         self.assertTrue( newObj == None )
-        
+
         self.eventprocessor.connectAndRun()
 
 
@@ -77,7 +76,7 @@ class Test( unittest.TestCase ):
         self.eventprocessor.connectAndRun()
 
 
-    def testNodeVersionCreation( self ):
+    def testVersionCreation( self ):
         node = factories.getObject( "Node", remote_id = testNodeID_1 )
         output = factories.getObject( "Output", remote_id = testOutputID_1 )
         project = factories.getObject( "Project", remote_id = testProjectID )
@@ -85,13 +84,14 @@ class Test( unittest.TestCase ):
         versionData = {
                        "code": "001",
                        "description": "delete me %s" % uuid.uuid1(),
-                       "entity": node.sg_link.getSgObj(),
-                       "sg_source_output": output.getSgObj(),
-                       "project": project.getSgObj(),
+                       "entity": node.sg_link.getShortDict(),
+                       "sg_source_output": output.getShortDict(),
+                       "project": project.getShortDict(),
                        }
 
         content = self.serverHandler.POST( "Version", None, None, versionData )
         entityDict = json.loads( content )
         self.assertTrue( entityDict["__local_id"] != None )
+        self.assertEqual( entityDict["entity"]["__local_id"], node.sg_link.getLocalID() )
 
         content = self.serverHandler.DELETE( "Version", entityDict["__local_id"], None, testdata = "dummy" )

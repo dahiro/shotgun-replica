@@ -32,6 +32,9 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     if local_id != None and local_id != UNKNOWN_SHOTGUN_ID:
         filters.append( "__local_id=%d" % local_id )
     
+    if len(filters) == 0:
+        return None
+    
     if includeRetireds:
         sqlFilter = " OR ".join( filters )
     else:

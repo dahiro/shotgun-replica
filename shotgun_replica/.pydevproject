@@ -7,6 +7,5 @@
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/shotgun_replica/python/src</path>
 <path>/shotgun_replica/python/tests</path>
-<path>/shotgun_replica/scripts</path>
 </pydev_pathproperty>
 </pydev_project>

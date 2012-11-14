@@ -16,14 +16,14 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
     names = ["task", "updated_by"]
     values = [task, updated_by]
-    
+
     if corr_entity != None:
-        names.append("corr_entity")
-        values.append(corr_entity)
-    
+        names.append( "corr_entity" )
+        values.append( corr_entity )
+
     if changed_values != None:
-        names.append("changed_values")
-        values.append(changed_values)
+        names.append( "changed_values" )
+        values.append( changed_values )
 
     repls = ["%s"] * len( names )
 
@@ -46,7 +46,7 @@ def createEntity( myObj ):
     src = connectors.DatabaseModificator()
     newID = src.add( myObj )
 
-    object.__setattr__(myObj, "local_id", newID)
+    object.__setattr__( myObj, "local_id", newID )
 
     _createChangeEvent( src, "creation",
                         corr_entity = myObj.getPgObj()
@@ -71,8 +71,15 @@ def changeEntity( myObj, changes ):
             changes[key] = value.getSgObj()
         elif isinstance( value, base_entity.ShotgunBaseEntity ):
             changes[key] = value.getSgObj()
+        elif type( value ) == type( [] ):
+            changes[key] = []
+            for entry in value:
+                if isinstance( entry, base_entity.ShotgunBaseEntity ) or type( entry ) == connectors.PostgresEntityType:
+                    changes[key].append( entry.getSgObj() )
+                else:
+                    changes[key].append( entry )
 
-    _createChangeEvent( src, "change", 
+    _createChangeEvent( src, "change",
                         corr_entity = myObj.getPgObj(),
                         changed_values = json.dumps( changes )
                         )
@@ -83,10 +90,10 @@ def changeEntity( myObj, changes ):
 def deleteEntity( myObj ):
     """delete an entity in couchdb and shotgun"""
     src = connectors.DatabaseModificator()
-    src.changeInDB(myObj, "__retired", True)
-    
-    _createChangeEvent( src, "deletion", 
-                        corr_entity = myObj.getPgObj())
+    src.changeInDB( myObj, "__retired", True )
+
+    _createChangeEvent( src, "deletion",
+                        corr_entity = myObj.getPgObj() )
 
     if myObj.getType() == "Task":
         pEntity = myObj.entity

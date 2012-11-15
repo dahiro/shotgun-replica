@@ -128,10 +128,10 @@ def getPgObj( val ):
 
             local_id = None
             # hier die local_id abklappern
-            if val.has_key("__local_id"):
+            if val.has_key( "__local_id" ):
                 local_id = val["__local_id"]
-            
-            if local_id == None or local_id==UNKNOWN_SHOTGUN_ID:
+
+            if local_id == None or local_id == UNKNOWN_SHOTGUN_ID:
                 # hier die local_id abklappern
                 local_id = getLocalID( val["type"], val["id"] )
 
@@ -239,7 +239,7 @@ class PostgresEntityType( object ):
         remote_id = self.remote_id
         if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
             remote_id = getRemoteID( self.type, self.local_id )
-        
+
         if remote_id == None or remote_id == shotgun_replica.UNKNOWN_SHOTGUN_ID:
             return None
         else:
@@ -422,12 +422,13 @@ class DatabaseModificator( object ):
                 filters.append( "id=%s" )
                 values.append( entityID )
 
-            query += " WHERE (" + " OR ".join( filters ) + " )"
-
-            debug.debug( query )
-            debug.debug( values )
-            debug.debug( cur.mogrify( query, values ) )
-            cur.execute( query, values )
+            if len(filters) > 0:
+                query += " WHERE (" + " OR ".join( filters ) + " )"
+    
+                debug.debug( query )
+                debug.debug( values )
+                debug.debug( cur.mogrify( query, values ) )
+                cur.execute( query, values )
         cur.close()
         self.con.commit()
 
@@ -515,10 +516,24 @@ class DatabaseModificator( object ):
         return newID
 
     def delete( self, myObj ):
-        query = "DELETE FROM \"%s\" WHERE id=%s or __local_id=%s" % ( myObj.getType(), "%s", "%s" )
+        query = "DELETE FROM \"%s\" WHERE " % ( myObj.getType() )
+
+        filters = []
+        filtervalues = []
+
+        if myObj.local_id != UNKNOWN_SHOTGUN_ID:
+            filters.append( "__local_id=%s" )
+            filtervalues.append( myObj.local_id )
+
+        if myObj.remote_id != UNKNOWN_SHOTGUN_ID:
+            filters.append( "id=%s" )
+            filtervalues.append( myObj.remote_id )
+
+        query += " OR ".join( filters )
+        
         cursor = self.con.cursor()
-        debug.debug( cursor.mogrify( query, ( myObj.remote_id, myObj.local_id ) ) )
-        cursor.execute( query, ( myObj.remote_id, myObj.local_id ) )
+        debug.debug( cursor.mogrify( query, filtervalues ) )
+        cursor.execute( query, filtervalues )
 
 def getDBConnection():
     global con

@@ -145,6 +145,8 @@ def getPgObj( val ):
         elif type( val ) == list:
             retval = [ getPgObj( entry ) for entry in val ]
             return retval
+        else:
+            return val
     else:
         return None
 

@@ -121,7 +121,9 @@ def getPgType( shotgunType ):
 
 def getPgObj( val ):
     if val != None:
-        if type( val ) == dict:
+        if type( val ) == PostgresEntityType:
+            return val
+        elif type( val ) == dict:
 
             if val["type"] in IGNORE_SHOTGUN_TYPES:
                 return None
@@ -138,10 +140,11 @@ def getPgObj( val ):
             return PostgresEntityType( val["type"],
                                        local_id = local_id,
                                        remote_id = val["id"] )
-        elif type( val ) == PostgresEntityType:
-            return val
         elif isinstance( val, base_entity.ShotgunBaseEntity ):
             return val.getPgObj()
+        elif type( val ) == list:
+            retval = [ getPgObj( entry ) for entry in val ]
+            return retval
     else:
         return None
 
@@ -259,6 +262,16 @@ class PostgresEntityType( object ):
             "__local_id": self.local_id,
         }
 
+    def __cmp__( self, objB ):
+        if objB == None:
+            return -99999
+        if objB.type == self.type:
+            if self.remote_id != UNKNOWN_SHOTGUN_ID and objB.remote_id != UNKNOWN_SHOTGUN_ID:
+                return cmp( self.remote_id, objB.remote_id )
+            else:
+                return cmp( self.local_id, objB.local_id )
+        else:
+            return cmp( self.type, objB.type )
 
 class DatabaseConnector( object ):
     con = None
@@ -302,12 +315,12 @@ class DatabaseModificator( object ):
             query += " LIMIT %s" % str( limit )
 
         if variables != None:
-#            debug.debug( query )
-#            debug.debug( variables )
-#            debug.debug( cur.mogrify( query, variables ) )
+            debug.debug( query )
+            debug.debug( variables )
+            debug.debug( cur.mogrify( query, variables ) )
             cur.execute( query, variables )
         else:
-#            debug.debug( cur.mogrify( query ) )
+            debug.debug( cur.mogrify( query ) )
             cur.execute( query )
 
         items = []
@@ -348,12 +361,10 @@ class DatabaseModificator( object ):
                     sgType = classOfType.shotgun_fields[attr]["data_type"]["value"]
                     convFunc = getConversionSg2Pg( sgType )
 
+                newValue = changes[attr]
                 if convFunc != None:
-                    values.append( convFunc( changes[attr] ) )
-                else:
-                    values.append( changes[attr] )
-
-#            values = [ changes[x] for x in keys ]
+                    newValue = convFunc( changes[attr] )
+                values.append( newValue )
 
             query = "UPDATE \"%s\" SET " % entityType
             changeArr = ["\"%s\" = %s" % ( x, "%s" ) for x in keys]
@@ -422,9 +433,9 @@ class DatabaseModificator( object ):
                 filters.append( "id=%s" )
                 values.append( entityID )
 
-            if len(filters) > 0:
+            if len( filters ) > 0:
                 query += " WHERE (" + " OR ".join( filters ) + " )"
-    
+
                 debug.debug( query )
                 debug.debug( values )
                 debug.debug( cur.mogrify( query, values ) )
@@ -530,7 +541,7 @@ class DatabaseModificator( object ):
             filtervalues.append( myObj.remote_id )
 
         query += " OR ".join( filters )
-        
+
         cursor = self.con.cursor()
         debug.debug( cursor.mogrify( query, filtervalues ) )
         cursor.execute( query, filtervalues )

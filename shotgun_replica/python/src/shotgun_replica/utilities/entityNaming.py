@@ -4,7 +4,8 @@ Created on Oct 17, 2012
 @author: bach
 '''
 import re
-from shotgun_replica import entities
+import shotgun_replica
+#from  import entities
 from shotgun_replica.utilities import debug
 
 def getConnectionEntityName( entityType, attribute ):
@@ -13,7 +14,7 @@ def getConnectionEntityName( entityType, attribute ):
     attributeName = replaceUnderscoresWithCapitals( attribute[:-1] )
     entityName = "%s%sConnection" % ( entityType, attributeName )
 
-    if not entities.__dict__.has_key( entityName ):
+    if not shotgun_replica.entities.__dict__.has_key( entityName ):
         entityName = None
         if attribute.find( "_" ) == -1:
             entityName = "%s%sConnection" % ( entityType, attribute[0].upper() + attribute[1:] )
@@ -23,7 +24,7 @@ def getConnectionEntityName( entityType, attribute ):
     debug.debug( ( entityType, attribute ) )
     debug.debug( ( entityName, attributeName ) )
 
-    if entities.__dict__.has_key( entityName ):
+    if shotgun_replica.entities.__dict__.has_key( entityName ):
         return entityName
     else:
         return None
@@ -66,3 +67,5 @@ def getReverseAttributeName( entityType, attr ):
     """return the name of an attribute that is a backlink"""
     entityQuoted = replaceCapitalsWithUnderscores( entityType )
     return "%s_%s_%ss" % ( entityQuoted, attr, entityQuoted )
+
+

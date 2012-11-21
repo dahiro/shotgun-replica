@@ -24,7 +24,7 @@ class Test( unittest.TestCase ):
     def setUp( self ):
         self.testproject = getObject( Project().getType(),
                                       remote_id = testProjectID )
-        self.eventprocessor = LocalDBEventSpooler()
+        self.local2shotgun = LocalDBEventSpooler()
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_BACKSYNC_SKRIPT,
                                    config.SHOTGUN_BACKSYNC_KEY )
@@ -45,7 +45,7 @@ class Test( unittest.TestCase ):
         self.assertTrue( shot_ret != None )
         self.assertTrue( shot_ret.getSgObj() == None )
 
-        allOk = self.eventprocessor.connectAndRun()
+        allOk = self.local2shotgun.connectAndRun()
         self.assertTrue( allOk, "errors while syncing " )
 
         shot_ret = getObject( "Shot", local_id = newshotid )
@@ -68,7 +68,7 @@ class Test( unittest.TestCase ):
                                limit = 100
                                )
         self.assertEqual( len( newshot ), 1 )
-        allOk = self.eventprocessor.connectAndRun()
+        allOk = self.local2shotgun.connectAndRun()
         self.assertTrue( allOk, "errors while syncing " )
 
         newshot = self.sg.find( 
@@ -98,8 +98,9 @@ class Test( unittest.TestCase ):
         newOutputID = output.getLocalID()
 
         node.delete()
+        output.delete()
 
-        ret = self.eventprocessor.connectAndRun()
+        ret = self.local2shotgun.connectAndRun()
         self.assertTrue( ret, "errors while syncing " )
 
         node = factories.getObject( entities.Node._type, local_id = newNodeID )

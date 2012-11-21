@@ -4,7 +4,7 @@ import shotgun_api3
 import json
 
 from shotgun_replica.factories import getObject
-from shotgun_replica import config, connectors
+from shotgun_replica import config, connectors, base_entity, UNKNOWN_SHOTGUN_ID
 import shotgun_replica
 
 import traceback
@@ -13,6 +13,22 @@ from shotgun_replica.utilities import debug
 LOCALDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
 SEVERE_FAILURE = 250
+
+def getSgObj( dataObj ):
+    if type( dataObj ) == dict:
+        if dataObj.has_key( "type" ) and dataObj.has_key( "id" ):
+            if dataObj["id"] == UNKNOWN_SHOTGUN_ID and dataObj.has_key( "__local_id" ) and dataObj["__local_id"] != UNKNOWN_SHOTGUN_ID:
+                remoteID = connectors.getRemoteID( dataObj["type"], dataObj["__local_id"] )
+                return { "type": dataObj["type"],
+                         "id": remoteID }
+            else:
+                return { "type": dataObj["type"],
+                         "id": dataObj["id"] }
+        return None
+    elif isinstance( dataObj, base_entity.ShotgunBaseEntity ) or type( dataObj ) == connectors.PostgresEntityType:
+        return dataObj.getSgObj()
+
+
 
 class LocalDBEventSpooler( object ):
     """ Continuously spools events from couchdb and transfers them to shotgun """
@@ -166,12 +182,12 @@ class LocalDBEventSpooler( object ):
                 if dataType == "float":
                     data[attribute] = float( value )
                 elif dataType == "entity":
-                    if type( value ) == connectors.PostgresEntityType:
-                        data[attribute] = value.getSgObj()
+                    data[attribute] = getSgObj( value )
                 elif dataType == "multi_entity":
+                    newvalue = []
                     for sgObj in value:
-                        if type( sgObj ) == connectors.PostgresEntityType:
-                            sgObj = sgObj.getSgObj()
+                        newvalue.append( getSgObj( sgObj ) )
+                    data[attribute] = newvalue
                 elif dataType == "date_time":
                     if type( value ) == type( u"" ):
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d %H:%M:%S" )

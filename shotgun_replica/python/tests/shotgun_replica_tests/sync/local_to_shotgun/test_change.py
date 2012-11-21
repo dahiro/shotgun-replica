@@ -36,7 +36,7 @@ class Test( unittest.TestCase ):
         shot.project = self.testproject
         shot.save()
         newshotid = shot.getLocalID()
-        self.eventprocessor.connectAndRun()
+        self.assertTrue( self.eventprocessor.connectAndRun(), "synch not successful" )
 
         shot_ret = getObject( "Shot", local_id = newshotid )
 
@@ -47,7 +47,7 @@ class Test( unittest.TestCase ):
         newCutIn = 1234
         shot_ret.sg_cut_in = newCutIn
         shot_ret.save()
-        self.eventprocessor.connectAndRun()
+        self.assertTrue( self.eventprocessor.connectAndRun(), "synch not successful" )
 
         newshot = self.sg.find( 
                                "Shot",
@@ -65,7 +65,7 @@ class Test( unittest.TestCase ):
         isShot = getObject( "Shot", local_id = newshotid )
         self.assertEqual( isShot, None )
 
-        self.eventprocessor.connectAndRun()
+        self.assertTrue( self.eventprocessor.connectAndRun(), "synch not successful" )
 
         newshot = self.sg.find( 
                                "Shot",

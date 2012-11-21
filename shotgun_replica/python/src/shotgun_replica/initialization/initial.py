@@ -4,9 +4,7 @@ from shotgun_api3.shotgun import Shotgun
 from elefant.utilities import config
 from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes
 from shotgun_replica.utilities import debug
-from shotgun_replica.sync.sync_settings import SyncomaniaSettings
-from shotgun_replica.sync.shotgun_to_local import FIELD_LASTEVENTID
-import shotgun_api3
+from shotgun_replica.sync import sync_settings
 
 # leave empty for every entity to be checked
 UPDATE_ONLY = [ ]
@@ -90,9 +88,9 @@ def setSyncSettings( sg ):
                     limit = 1 )
 
     lastEventId = eventliste[0]["id"]
-    syncSettings = SyncomaniaSettings()
+    syncSettings = sync_settings.SyncomaniaSettings()
     syncSettings.load()
-    syncSettings[FIELD_LASTEVENTID] = lastEventId
+    syncSettings[sync_settings.FIELD_LASTEVENTID] = lastEventId
     syncSettings.save()
 
 if __name__ == "__main__":

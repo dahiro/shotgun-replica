@@ -268,8 +268,6 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             name = "local_id"
 
         fieldvalue = object.__getattribute__( self, name )
-        if fieldvalue == None:
-            return None
 
         fielddef = object.__getattribute__( self, "shotgun_fields" )
 
@@ -286,6 +284,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             elif fielddef[name]["data_type"]["value"] == "multi_entity":
                 entityObjArray = fieldvalue
                 entityList = []
+
+                if entityObjArray == None:
+                    return []
+
                 for entityObj in entityObjArray:
                     if type( entityObj ) == connectors.PostgresEntityType:
 

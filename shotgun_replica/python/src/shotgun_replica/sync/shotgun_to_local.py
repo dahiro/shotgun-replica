@@ -58,14 +58,14 @@ class EventSpooler( object ):
         # everything is ok
         return True
 
-    def _processIteration(self):
+    def _processIteration( self ):
         current = self.data[sync_settings.FIELD_LASTEVENTID]
         ep = EventProcessor( self.src, self.sg )
         eventliste = []
         ANZAHL = 100
-        
+
         doRepeat = True
-        
+
         while doRepeat:
             try:
                 eventliste = self.sg.find( 
@@ -75,29 +75,29 @@ class EventSpooler( object ):
                                 order = [{'column':'id', 'direction':'asc'}],
                                 filter_operator = 'all',
                                 limit = ANZAHL )
-    
+
             except Exception, error: #IGNORE:W0703
                 debug.debug( "Exception retrieving Events from Shotgun: ", debug.ERROR )
                 debug.debug( error, debug.ERROR )
                 eventliste = []
                 return False
-    
+
             doRepeat = len( eventliste ) == ANZAHL
-    
+
             for event in eventliste:
                 debug.debug( 'processing event id %d' % event['id'] )
                 debug.debug( '     ' + event['event_type'] )
-    
+
                 debug.debug( event )
-    
+
                 status = ep.process( event )
                 status = EVENT_OK
                 if ( status in [ EVENT_OK, EVENT_UNKNOWN ] ):
                     if status == EVENT_UNKNOWN:
                         debug.debug( "ignored unknown event: " + str( event['id'] ) )
-    
+
                     current = event['id']
-    
+
                     self.data[sync_settings.FIELD_LASTEVENTID] = current
                     self.data.save()
                     self.src.con.commit()
@@ -222,7 +222,7 @@ class EventProcessor( object ):
             toadd = event['meta']['added']
             toremove = event['meta']['removed']
 
-            changes[event['meta']['attribute_name']] = entity.__getattribute__( event['meta']['attribute_name'] )
+            changes[event['meta']['attribute_name']] = entity.getRawField( event['meta']['attribute_name'] )
 
             if changes[event['meta']['attribute_name']] == None:
                 changes[event['meta']['attribute_name']] = []
@@ -233,17 +233,20 @@ class EventProcessor( object ):
 
             for item in toadd:
                 if item != None:
-                    childlist.append( self._cleanItem( item ) )
+                    pgObj = connectors.getPgObj( self._cleanItem( item ) )
+                    if not pgObj in childlist:
+                        childlist.append( pgObj )
 
             for item in toremove:
                 if item != None:
+                    remPgObj = connectors.getPgObj( item )
                     remType = item['type']
                     remId = item['id']
 
                     for childItem in childlist:
-                        if childItem == None or ( childItem.getRemoteID() == remId and childItem.getType() == remType ):
+                        if childItem == None or ( childItem.remote_id == remId and childItem.type == remType ):
                             removeConnEntities.append( ( entity, childItem ) )
-                            childlist.remove( childItem )
+                            childlist.remove( remPgObj )
 
             for ( entity, childItem ) in removeConnEntities:
 
@@ -252,16 +255,16 @@ class EventProcessor( object ):
                 if connectionEntityName:
                     ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entity.getType(),
                                                                                              childItem.getType() )
-    
+
                     filters = "%s=%s and %s=%s" % ( srcAttrName,
                                                     "%s",
                                                     dstAttrName,
                                                     "%s"
                                                   )
-                    filterValues = [ entity.getPgObj(), childItem.getPgObj() ]
-    
+                    filterValues = [ connectors.getPgObj( entity ), connectors.getPgObj( childItem ) ]
+
                     delEntities = factories.getObjects( connectionEntityName, filters, filterValues )
-    
+
                     for entity in delEntities:
                         self.src.delete( entity )
 
@@ -288,7 +291,7 @@ class EventProcessor( object ):
         entity = factories.getObject( self.event['meta']['class_name'], remote_id = self.event['meta']['id'] )
         if entity == None:
 
-            debug.debug( "object to delete not available", debug.WARNING )
+            debug.debug( "object to delete not available", debug.INFO )
             return EVENT_UNKNOWN
 
         else:
@@ -318,15 +321,14 @@ class EventProcessor( object ):
         detAttribs = connectors.getClassOfType( self.obj_type ).shotgun_fields
 
         if self.event['entity'] == None:
-            debug.debug( "no entity data on newly created object - deleted already?", debug.WARNING )
+            debug.debug( "no entity data on newly created object - deleted already?", debug.INFO )
             return EVENT_UNKNOWN
 
         # check wheater already available
         obj = factories.getObject( self.obj_type,
                                    remote_id = self.event['entity']['id'] )
-
         if obj:
-            debug.debug( "entity already available in local database", debug.WARNING )
+            debug.debug( "entity already available in local database", debug.INFO )
             return EVENT_UNKNOWN
 
         item = self.sg.find_one( self.obj_type,
@@ -334,8 +336,30 @@ class EventProcessor( object ):
                                 fields = detAttribs.keys() )
 
         if item == None:
-            debug.debug( "no entity to work on", debug.WARNING )
+            debug.debug( "no entity to work on - deleted already?", debug.INFO )
             return EVENT_UNKNOWN
+
+        # check if it is a connection-entity and already available
+        if self.obj_type.endswith( "Connection" ):
+            nameparts = re.sub( "_Connection$", "", self.obj_type )
+            entityType = nameparts[:nameparts.find( "_" )]
+            attributeName = nameparts[nameparts.find( "_" ) + 1: ]
+            destEntityType = connectors.getClassOfType( entityType ).shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
+
+            ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, destEntityType )
+
+            filters = "%s=%s and %s=%s" % ( srcAttrName,
+                                            "%s",
+                                            dstAttrName,
+                                            "%s"
+                                          )
+            filterValues = [ item[srcAttrName], item[dstAttrName] ]
+
+            connEntities = factories.getObjects( self.obj_type, filters, filterValues )
+
+            if len( connEntities ) > 0:
+                debug.debug( "Connection-Entity already available", debug.INFO )
+                return EVENT_UNKNOWN
 
         self.src.add( item )
 

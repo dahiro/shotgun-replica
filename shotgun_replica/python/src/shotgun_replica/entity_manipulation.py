@@ -95,7 +95,8 @@ def changeEntity( myObj, changes ):
                 targetType = myObj.shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
 
                 ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType,
-                                                                                         targetType )
+                                                                                         targetType,
+                                                                                         connEntityName )
 
                 srcPgObj = myObj.getPgObj()
 

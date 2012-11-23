@@ -43,13 +43,14 @@ class Test( unittest.TestCase ):
 
     def testConnectionAttrNames( self ):
         testPairs = [
-            ( "Asset", "Asset", "source_asset", "dest_asset" ),
-            ( "Asset", "Shot", "asset", "shot" ),
-            ( "CustomEntity07", "CustomEntity05", "custom_entity07", "custom_entity05" ),
+            ( "Asset", "Asset", "AssetAssetConnection", "asset", "parent" ),
+            ( "Asset", "Shot", "AssetShotConnection", "asset", "shot" ),
+            ( "CustomEntity07", "CustomEntity05", "CustomEntity07_sg_sources_Connection", "custom_entity07", "custom_entity05" ),
+            ( "Revision", "Revision", "RevisionRevisionConnection", "source_revision", "dest_revision"),
         ]
 
-        for ( srcEntityType, destEntityType, srcAttrName, destAttrName ) in testPairs:
-            ( srcAttrNameTest, destAttrNameTest ) = entityNaming.getConnectionEntityAttrName( srcEntityType, destEntityType )
+        for ( srcEntityType, destEntityType, connEntityName, srcAttrName, destAttrName ) in testPairs:
+            ( srcAttrNameTest, destAttrNameTest ) = entityNaming.getConnectionEntityAttrName( srcEntityType, destEntityType, connEntityName )
             self.assertEqual( srcAttrNameTest, srcAttrName )
             self.assertEqual( destAttrNameTest, destAttrName )
 

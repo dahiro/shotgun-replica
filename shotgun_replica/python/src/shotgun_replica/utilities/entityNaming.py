@@ -7,6 +7,7 @@ import re
 import shotgun_replica
 #from  import entities
 from shotgun_replica.utilities import debug
+from shotgun_replica import connectors
 
 def getConnectionEntityName( entityType, attribute ):
     """ return the name of a connection-entity"""
@@ -29,17 +30,24 @@ def getConnectionEntityName( entityType, attribute ):
     else:
         return None
 
-def getConnectionEntityAttrName( srcEntityType, destEntityType ):
+def getConnectionEntityAttrName( srcEntityType, destEntityType, connEntityName ):
     """return the attribute-names of the connection-entity"""
 
     srcAttrName = replaceCapitalsWithUnderscores( srcEntityType )
     dstAttrName = replaceCapitalsWithUnderscores( destEntityType )
 
-    if srcAttrName == dstAttrName:
-        srcAttrName = "source_" + srcAttrName
-        dstAttrName = "dest_" + dstAttrName
+    if srcAttrName != dstAttrName:
+        return ( srcAttrName, dstAttrName )
+    else:
+        theclass = connectors.getClassOfType( connEntityName )
 
-    return ( srcAttrName, dstAttrName )
+        srcAttrNamePrefixed = "source_" + srcAttrName
+        dstAttrNamePrefixed = "dest_" + dstAttrName
+
+        if theclass.shotgun_fields.has_key( srcAttrNamePrefixed ) and theclass.shotgun_fields.has_key( dstAttrNamePrefixed ):
+            return ( srcAttrNamePrefixed, dstAttrNamePrefixed )
+        elif theclass.shotgun_fields.has_key( srcAttrName ) and theclass.shotgun_fields.has_key( "parent" ):
+            return ( srcAttrName, "parent" )
 
 def replaceCapitalsWithUnderscores( name ):
     """return the name of an attribute that is a backlink"""
@@ -65,7 +73,13 @@ def replaceUnderscoresWithCapitals( name ):
 
 def getReverseAttributeName( entityType, attr ):
     """return the name of an attribute that is a backlink"""
-    entityQuoted = replaceCapitalsWithUnderscores( entityType )
-    return "%s_%s_%ss" % ( entityQuoted, attr, entityQuoted )
+    
+    if entityType=="Asset" and attr == "assets":
+        return "parents"
+    elif entityType=="Shot" and attr == "shots":
+        return "parent_shots"
+    else:
+        entityQuoted = replaceCapitalsWithUnderscores( entityType )
+        return "%s_%s_%ss" % ( entityQuoted, attr, entityQuoted )
 
 

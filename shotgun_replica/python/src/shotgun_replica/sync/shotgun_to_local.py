@@ -254,7 +254,8 @@ class EventProcessor( object ):
                                                                              event['meta']['attribute_name'] )
                 if connectionEntityName:
                     ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entity.getType(),
-                                                                                             childItem.getType() )
+                                                                                             childItem.getType(),
+                                                                                             connectionEntityName )
 
                     filters = "%s=%s and %s=%s" % ( srcAttrName,
                                                     "%s",
@@ -341,12 +342,17 @@ class EventProcessor( object ):
 
         # check if it is a connection-entity and already available
         if self.obj_type.endswith( "Connection" ):
-            nameparts = re.sub( "_Connection$", "", self.obj_type )
-            entityType = nameparts[:nameparts.find( "_" )]
-            attributeName = nameparts[nameparts.find( "_" ) + 1: ]
+            if self.obj_type.find( "_" ) != -1:
+                nameparts = re.sub( "_Connection$", "", self.obj_type )
+                entityType = nameparts[:nameparts.find( "_" )]
+                attributeName = nameparts[nameparts.find( "_" ) + 1: ]
+            else:
+                ( entityType, attributeName, dummy ) = re.sub( r"([A-Z])", r",\1", self.obj_type ).split( "," )[1:]
+                attributeName = attributeName.lower() + "s"
+
             destEntityType = connectors.getClassOfType( entityType ).shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
 
-            ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, destEntityType )
+            ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, destEntityType, self.obj_type )
 
             filters = "%s=%s and %s=%s" % ( srcAttrName,
                                             "%s",

@@ -72,7 +72,8 @@ def getConnectionObj( sourceObj, attribute, targetObj ):
 
     if connEntityName:
         ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( sourceObj.getType(),
-                                                                                 targetObj.getType() )
+                                                                                 targetObj.getType(),
+                                                                                 connEntityName )
 
         filters = "%s=%s and %s=%s" % ( srcAttrName,
                                         "%s",

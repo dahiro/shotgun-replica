@@ -39,21 +39,21 @@ class Test( unittest.TestCase ):
 
     def testLinkedAsset( self ):
 
-        self.testasset.sg_linked_assets = [ self.linkedAsset ]
+        self.testasset.assets = [ self.linkedAsset ]
         self.testasset.save()
 
         # get connection objects from source
-        connObj = factories.getConnectionObj( self.testasset, "sg_linked_assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
         self.assertNotEqual( connObj, None )
 
         # TODO: synch and check if not two connObj
         # 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
-        connObj = factories.getConnectionObj( self.testasset, "sg_linked_assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
         # get attribute of reverse field
-        reverseAttrName = entityNaming.getReverseAttributeName( "Asset", "sg_linked_assets" )
+        reverseAttrName = entityNaming.getReverseAttributeName( "Asset", "assets" )
         linkedAsset = factories.getObject( "Asset", local_id = self.linkedAsset.getLocalID() )
         retLinks = linkedAsset.getField( reverseAttrName )
         self.assertTrue( retLinks != None and self.testasset in retLinks )
@@ -62,15 +62,15 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( self.testasset, "sg_linked_assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
         # remove connection
 
-        self.testasset.sg_linked_assets = [ ]
+        self.testasset.assets = [ ]
         self.testasset.save()
 
-        connObj = factories.getConnectionObj( self.testasset, "sg_linked_assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
         self.assertEqual( connObj, None )
 
         linkedAsset = factories.getObject( "Asset", local_id = self.linkedAsset.getLocalID() )
@@ -79,7 +79,7 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( self.testasset, "sg_linked_assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
         self.assertEqual( connObj, None )
 
 if __name__ == "__main__":

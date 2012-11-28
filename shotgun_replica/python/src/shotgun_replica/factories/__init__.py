@@ -64,7 +64,7 @@ def getObjects( entityType, filters, filterValues, orderby = None, limit = None,
     return resultList
 
 
-def getConnectionObj( sourceObj, attribute, targetObj ):
+def getConnectionObj( targetObj, sourceObj, attribute ):
     """
     return the connection obj of two connected entities
     """

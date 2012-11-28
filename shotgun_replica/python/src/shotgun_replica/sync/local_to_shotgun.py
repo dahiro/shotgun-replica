@@ -117,11 +117,8 @@ class LocalDBEventSpooler( object ):
             debug.debug( "removing link: %s with local ID %d" % ( corr_entity.type,
                                                                   corr_entity.local_id ) )
             success = self._changeEntity( changeEvent )
-        if success:
-            self._setProcessed( changeEvent )
-            return True
-        else:
-            return False
+
+        return success
 
     def connectAndRun( self ):
         if self._connect():
@@ -150,12 +147,14 @@ class LocalDBEventSpooler( object ):
         entity = event["corr_entity"]
         entityObj = getObject( entity.type,
                                remote_id = entity.remote_id,
-                               local_id = entity.local_id )
+                               local_id = entity.local_id,
+                               includeRetireds = True )
 
         if entityObj == None:
-            exception = "Object not available %s local:%s remote:%s" % ( str( entity.type ),
-                                                                         str( entity.local_id ),
-                                                                         str( entity.remote_id ) )
+            exception = "Object not available %s local:%s remote:%s\n\n" % ( str( entity.type ),
+                                                                             str( entity.local_id ),
+                                                                             str( entity.remote_id ) )
+
             self._setProcessed( event, exception = exception )
             return False
 
@@ -203,7 +202,17 @@ class LocalDBEventSpooler( object ):
 
             try:
                 debug.debug( data )
+
+                if entityObj.getType().endswith( "Connection" ) and entityObj.getRemoteID() == UNKNOWN_SHOTGUN_ID:
+                    remoteID = connectors.getRemoteID( entityObj.getType(), entityObj.getLocalID() )
+                    if remoteID == None or remoteID == UNKNOWN_SHOTGUN_ID:
+                        # Connection-Entities need first the corresponding remote-id
+                        # they get that by the shotgun-event triggered by the event that causes this connection-entity to be created
+                        # so we simply have to wait and do nothing (hopefully ;)
+                        return True
+
                 self.sg.update( entityObj.getType(), entityObj.getRemoteID(), data )
+                self._setProcessed( event )
                 return True
             except shotgun_api3.Fault, fault:
                 #event["type"] = "CouchdbChangeEvents"
@@ -235,6 +244,7 @@ class LocalDBEventSpooler( object ):
 
                 self.src.changeInDB( obj, "id", newdata["id"] )
 
+                self._setProcessed( event )
                 return True
             except AttributeError, fault:
                 #event["type"] = "CouchdbChangeEvents"
@@ -256,12 +266,13 @@ class LocalDBEventSpooler( object ):
 
         entity = event["corr_entity"]
         obj = getObject( entity.type, local_id = entity.local_id, includeRetireds = True )
-        
+
 
         if obj and obj.getRemoteID() != shotgun_replica.UNKNOWN_SHOTGUN_ID:
             try:
                 self.src.delete( entity )
                 self.sg.delete( entity.type, obj.getRemoteID() )
+                self._setProcessed( event )
                 return True
             except shotgun_api3.Fault, fault:
                 exception = "Error %s" % ( str( fault ) )

@@ -33,13 +33,8 @@ class SyncDaemon( object ):
         self.syncomaniaSettings.save()
 
     def _generateCode(self):
-        codesuffix = uuid.uuid1()
-        # TODO: hier weitermachen
-        # TODO: hier weitermachen
-        # TODO: hier weitermachen
-        # TODO: hier weitermachen
-        socket.gethostbyname_ex(socket.gethostname())
-        socket.gethostbyname(socket.getfqdn())
+        code = "%s: %s" % ( socket.gethostname(), uuid.uuid1() )
+        return code
         
     def run( self ):
 
@@ -57,15 +52,15 @@ class SyncDaemon( object ):
             debug.error( "another daemon seems to have started running" )
             return OTHER_SYNCDAMEON_RUNNING
 
-        stateS2L = self.shotgun_to_local_spooler.connectAndRun()
-        if not stateS2L:
-            debug.debug( "something not OK", debug.ERROR )
+        state_Shotgun_to_Local = self.shotgun_to_local_spooler.connectAndRun()
+        if not state_Shotgun_to_Local:
+            debug.debug( "something not OK syncing Shotgun to Local", debug.ERROR )
 
-        stateL2S = self.local_to_shotgun_spooler.connectAndRun()
-        if not stateL2S:
-            debug.debug( "something not OK", debug.ERROR )
+        state_Local_to_Shotgun = self.local_to_shotgun_spooler.connectAndRun()
+        if not state_Local_to_Shotgun:
+            debug.debug( "something not OK syncing Local to Shotgun", debug.ERROR )
         
-        if not stateS2L or not stateL2S:
+        if not state_Shotgun_to_Local or not state_Local_to_Shotgun:
             return SYNCED_NOT_OK
         else:
             return SYNCED_OK

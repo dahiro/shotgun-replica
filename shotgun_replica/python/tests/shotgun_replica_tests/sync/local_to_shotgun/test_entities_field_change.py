@@ -8,7 +8,7 @@ import tests_elefant
 from shotgun_replica import factories, entities
 from tests_elefant import commanda
 from shotgun_replica.sync import local_to_shotgun, shotgun_to_local
-from shotgun_replica.utilities import entityNaming
+from shotgun_replica.utilities import entityNaming, debug
 
 
 class Test( unittest.TestCase ):
@@ -28,7 +28,9 @@ class Test( unittest.TestCase ):
         self.task = factories.getObject( "Task", remote_id = tests_elefant.testTaskID )
 
         self.testasset = tests_elefant.createTestAsset( self.testassetlibrary )
+        debug.debug( self.testasset.getLocalID() )
         self.linkedAsset = tests_elefant.createTestAsset( self.testassetlibrary )
+        debug.debug( self.linkedAsset.getLocalID() )
 
 
     def tearDown( self ):
@@ -43,13 +45,17 @@ class Test( unittest.TestCase ):
         self.testasset.save()
 
         # get connection objects from source
-        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( targetObj = self.testasset,
+                                              sourceObj = self.linkedAsset,
+                                              attribute = "assets" )
         self.assertNotEqual( connObj, None )
 
         # TODO: synch and check if not two connObj
         # 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
-        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( targetObj = self.testasset,
+                                              sourceObj = self.linkedAsset,
+                                              attribute = "assets" )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
         # get attribute of reverse field
@@ -62,7 +68,9 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( targetObj = self.testasset,
+                                              sourceObj = self.linkedAsset,
+                                              attribute = "assets" )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
         # remove connection
@@ -70,7 +78,9 @@ class Test( unittest.TestCase ):
         self.testasset.assets = [ ]
         self.testasset.save()
 
-        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( targetObj = self.testasset,
+                                              sourceObj = self.linkedAsset,
+                                              attribute = "assets" )
         self.assertEqual( connObj, None )
 
         linkedAsset = factories.getObject( "Asset", local_id = self.linkedAsset.getLocalID() )
@@ -79,7 +89,9 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( self.testasset, "assets", self.linkedAsset )
+        connObj = factories.getConnectionObj( targetObj = self.testasset,
+                                              sourceObj = self.linkedAsset,
+                                              attribute = "assets" )
         self.assertEqual( connObj, None )
 
 if __name__ == "__main__":

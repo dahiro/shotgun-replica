@@ -93,9 +93,13 @@ def setSyncSettings( sg ):
     syncSettings[sync_settings.FIELD_LASTEVENTID] = lastEventId
     syncSettings.save()
 
+def removeChangeEvents( conn, cur, sg ):
+    cur.execute('DELETE FROM "ChangeEventsToShotgun"');
+
 if __name__ == "__main__":
     ( conn, cur, sg ) = _connect()
 
     _create_shotgun_classes.main()
     setSyncSettings( sg )
+    removeChangeEvents( conn, cur, sg )
     importEntities( conn, cur, sg )

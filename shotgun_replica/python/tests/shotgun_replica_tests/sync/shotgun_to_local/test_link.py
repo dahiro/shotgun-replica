@@ -17,6 +17,7 @@ from shotgun_replica import config, factories
 from shotgun_replica.utilities import debug, entityNaming
 import pprint
 from shotgun_replica._entity_mgmt import _ShotgunEntity
+from shotgun_replica.sync import shotgun_to_local
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -30,6 +31,7 @@ class Test( unittest.TestCase ):
         self.ep = EventProcessor( self.src, self.sg )
 
         self.deleteEntities = []
+        self.shotgun2local = shotgun_to_local.EventSpooler()
 
     def tearDown( self ):
 
@@ -46,9 +48,7 @@ class Test( unittest.TestCase ):
             else:
                 raise Exception( "%s not handled" % type( entry ) )
 
-        newevents = self._getNewEvents()
-        for newevent in newevents:
-            self.ep.process( newevent )
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
     def _getNewEvents( self ):
         newevents = self.sg.find( "EventLogEntry",
@@ -167,8 +167,7 @@ class Test( unittest.TestCase ):
         self.assertEqual( len( connObjs ), 0, "conn-objs still available: %s" % pprint.pformat( connObjs, indent = 2 ) )
 
     def _processEvents( self, newevents ):
-        for newevent in newevents:
-            self.ep.process( newevent )
+        self.shotgun2local.connectAndRun()
 
         self.lastID = newevents[len( newevents ) - 1]["id"]
 

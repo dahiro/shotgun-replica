@@ -36,8 +36,8 @@ class Test( unittest.TestCase ):
     def tearDown( self ):
         self.testasset.delete()
         self.linkedAsset.delete()
-        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
     def testLinkedAsset( self ):
 

@@ -17,6 +17,7 @@ from shotgun_api3 import shotgun
 import unittest
 from shotgun_replica import config
 from shotgun_replica.utilities import debug
+from shotgun_replica.sync import shotgun_to_local
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -28,6 +29,7 @@ class Test( unittest.TestCase ):
                                    config.SHOTGUN_SYNC_SKRIPT,
                                    config.SHOTGUN_SYNC_KEY )
         self.src = DatabaseModificator()
+        self.shotgun2local = shotgun_to_local.EventSpooler()
 
     def tearDown( self ):
         task = getObject( "Task", remote_id = testTaskID )
@@ -64,9 +66,8 @@ class Test( unittest.TestCase ):
         self.failUnlessEqual( newevent["entity"]["id"], testTaskID )
         self.failUnlessEqual( newevent["meta"]["new_value"], NEWVALUE )
         self.failUnlessEqual( newevent["id"], lastID + 1 )
-
-        ep = EventProcessor( self.src, self.sg )
-        ep.process( newevent )
+        
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
         task = getObject( "Task", remote_id = testTaskID )
         self.assertEqual( NEWVALUE, task.sg_status_list )

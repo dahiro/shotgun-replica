@@ -46,7 +46,7 @@ class SyncDaemon( object ):
             sys.stdout.write( "." )
             time.sleep( 2 )
 
-    def connectAndRun( self ):
+    def connectAndRun( self, onlyEventIDs = None ):
         self.syncomaniaSettings.load()
         if self.syncomaniaSettings.get( sync_settings.FIELD_CURRENT_SYNCDAEMON_ID ) != self.mycode:
             debug.error( "another daemon seems to have started running" )
@@ -56,7 +56,7 @@ class SyncDaemon( object ):
         if not state_Shotgun_to_Local:
             debug.debug( "something not OK syncing Shotgun to Local", debug.ERROR )
 
-        state_Local_to_Shotgun = self.local_to_shotgun_spooler.connectAndRun()
+        state_Local_to_Shotgun = self.local_to_shotgun_spooler.connectAndRun( onlyEventIDs = onlyEventIDs )
         if not state_Local_to_Shotgun:
             debug.debug( "something not OK syncing Local to Shotgun", debug.ERROR )
         

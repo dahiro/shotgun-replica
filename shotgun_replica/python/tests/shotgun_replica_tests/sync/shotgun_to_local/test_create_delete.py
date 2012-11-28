@@ -17,6 +17,7 @@ from uuid import uuid1
 import unittest
 from shotgun_replica import config
 from shotgun_replica.utilities import debug
+from shotgun_replica.sync import shotgun_to_local
 
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
@@ -29,24 +30,16 @@ class Test( unittest.TestCase ):
                                    config.SHOTGUN_SYNC_KEY )
         self.src = DatabaseModificator()
         self.ep = EventProcessor( self.src, self.sg )
+        
+        self.shotgun2local = shotgun_to_local.EventSpooler()
 
     def tearDown( self ):
         pass
 
     def testAddTask( self ):
-        lastevent = self.sg.find( 
-                                 "EventLogEntry",
-                                 filters = [],
-                                 fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
-                                 order = [{'column':'id', 'direction':'desc'}],
-                                 filter_operator = 'all',
-                                 limit = 1
-                                 )[0]
-        debug.debug( lastevent )
 
         shotCode = "TEST SHOT (delete me) %s" % uuid1()
 
-        lastID = lastevent["id"]
         data = {
                 "project": {"type": "Project",
                             "id": testProjectID
@@ -54,43 +47,16 @@ class Test( unittest.TestCase ):
                 "code": shotCode
                 }
         newShotDict = self.sg.create( "Shot", data, [] )
-        debug.debug( newShotDict )
-
-        newevents = self.sg.find( 
-                                 "EventLogEntry",
-                                 filters = [['id', 'greater_than', lastID]],
-                                 fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
-                                 order = [{'column':'id', 'direction':'asc'}],
-                                 filter_operator = 'all',
-                                 limit = 100
-                                 )
-
-        debug.debug( newevents )
-
-        self.assertEqual( newevents[0]["event_type"], "Shotgun_Shot_New", "event not as expected" )
-
-        for newevent in newevents:
-            self.ep.process( newevent )
-            lastID = newevent["id"]
+        
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
         shot = getObject( "Shot", remote_id = newShotDict["id"] )
         self.assertEqual( type( shot ), Shot )
         self.assertEqual( shot.code, shotCode )
 
         self.sg.delete( "Shot", newShotDict["id"] )
-
-        newevents = self.sg.find( 
-                                 "EventLogEntry",
-                                 filters = [['id', 'greater_than', lastID]],
-                                 fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
-                                 order = [{'column':'id', 'direction':'asc'}],
-                                 filter_operator = 'all',
-                                 limit = 100
-                                 )
-
-        for newevent in newevents:
-            self.ep.process( newevent )
-            lastID = newevent["id"]
+        
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
         shot = getObject( "Shot", remote_id = newShotDict["id"] )
         self.assertEqual( shot, None )

@@ -58,7 +58,7 @@ class LocalDBEventSpooler( object ):
 
         return True
 
-    def queryAndProcess( self ):
+    def queryAndProcess( self, onlyEventIDs = None ):
         """ queries and processes events from shotgun
         
         this method is mainly used from the run method but also for testing purposes
@@ -68,9 +68,15 @@ class LocalDBEventSpooler( object ):
         # query first changeEvents, and then tempObject
         # tempObjects need then to be created first
 
-        query = "SELECT * FROM \"ChangeEventsToShotgun\" WHERE" + \
-            " NOT processed ORDER BY created ASC, id ASC"
-        self.cur.execute( query )
+        query = "SELECT * FROM \"ChangeEventsToShotgun\" WHERE  NOT processed"
+        if onlyEventIDs != None:
+            query += " id = ANY(%s)"
+            query += " ORDER BY created ASC, id ASC"
+            self.cur.execute( query, (onlyEventIDs, ) )
+        else:
+            query += " ORDER BY created ASC, id ASC"
+            self.cur.execute( query )
+            
         descriptions = self.cur.description
         allOk = True
         for result in self.cur:
@@ -120,10 +126,10 @@ class LocalDBEventSpooler( object ):
 
         return success
 
-    def connectAndRun( self ):
+    def connectAndRun( self, localEvents = None ):
         if self._connect():
             self.cur = self.src.con.cursor()
-            returner = self.queryAndProcess()
+            returner = self.queryAndProcess( localEvents )
             self.src.con.commit()
             self.cur.close()
             return returner

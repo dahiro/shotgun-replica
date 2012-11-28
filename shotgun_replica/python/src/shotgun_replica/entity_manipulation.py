@@ -11,7 +11,11 @@ from shotgun_replica import connectors, base_entity, factories
 from shotgun_replica.utilities import debug, entityNaming
 from shotgun_replica.connectors import getPgObj
 
+CREATED_CHANGE_EVENTS = []
+
 def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
+
+    global CREATED_CHANGE_EVENTS
 
     updated_by = connectors.getPostgresUser()
 
@@ -34,7 +38,27 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
     cur = src.con.cursor()
     debug.debug( cur.mogrify( query, values ) )
     cur.execute( query, values )
+
+    cur.execute( "SELECT currval('\"ChangeEventsToShotgun_id_seq\"')" )
+    ( eventid, ) = cur.fetchone()
+    CREATED_CHANGE_EVENTS.append( eventid )
+
     src.con.commit()
+
+def removeCreatedChangeEvents():
+    """
+    method to get rid of change events that where created during unit and integration tests
+    see tests_elefant.baseTest
+    """
+    global CREATED_CHANGE_EVENTS
+
+    debug.debug( CREATED_CHANGE_EVENTS )
+
+    src = connectors.DatabaseModificator()
+    cur = src.con.cursor()
+    cur.execute( "DELETE FROM \"ChangeEventsToShotgun\" WHERE id = ANY(%s)", ( CREATED_CHANGE_EVENTS, ) )
+    CREATED_CHANGE_EVENTS = []
+
 
 def createEntity( myObj ):
     """
@@ -146,7 +170,7 @@ def changeEntity( myObj, changes ):
                 for connection in connections:
                     targetObj = connection.getField( srcAttrName )
                     retValues = targetObj.getRawField( reverseAttribute )
-                    
+
                     retValues.remove( tgPgObj )
                     src.changeInDB( targetObj, reverseAttribute, retValues )
                     src.delete( connection )

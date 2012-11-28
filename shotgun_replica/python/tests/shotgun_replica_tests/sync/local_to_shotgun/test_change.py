@@ -16,6 +16,7 @@ from shotgun_api3 import shotgun
 
 import unittest
 import uuid
+from shotgun_replica.sync import shotgun_to_local
 
 class Test( unittest.TestCase ):
 
@@ -25,9 +26,10 @@ class Test( unittest.TestCase ):
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
                                    config.SHOTGUN_BACKSYNC_SKRIPT,
                                    config.SHOTGUN_BACKSYNC_KEY )
+        self.shotgun2local = shotgun_to_local.EventSpooler()
 
     def tearDown( self ):
-        pass
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
     def test_create( self ):
 

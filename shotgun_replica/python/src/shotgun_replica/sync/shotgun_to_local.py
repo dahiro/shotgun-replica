@@ -405,3 +405,7 @@ def saveShotgunImageLocally( url ):
     imagefile = open( savedAt, "w" )
     imagefile.write( content )
     imagefile.close()
+
+if __name__ == "__main__":
+    es = EventSpooler()
+    es.connectAndRun()

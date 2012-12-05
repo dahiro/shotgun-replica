@@ -119,6 +119,12 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         return self.__getattribute__( fieldname )
 
+    def setField( self, fieldname, fieldvalue ):
+        """
+        set field value of this object
+        """
+        return self.__setattr__( fieldname, fieldvalue )
+
     def getRawField( self, fieldname ):
         """
         get raw field value and do not retrieve linked objects from db

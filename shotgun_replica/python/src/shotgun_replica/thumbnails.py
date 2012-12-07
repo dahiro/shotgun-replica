@@ -51,6 +51,10 @@ def getLocalThumbPath( url ):
 
 def saveShotgunImageLocally( url ):
     """save shotgun image locally"""
+    if type(url) not in [str, unicode]:
+        return None
+    debug.debug("loading: "+url)
+
     http = Http()
     [response, content] = http.request( url, "GET" )
     debug.debug( response )

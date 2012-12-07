@@ -9,12 +9,10 @@ Created on Jun 25, 2012
 from shotgun_replica.entities import Task
 from shotgun_replica.sync.sync_settings import SyncomaniaSettings
 from shotgun_replica.utilities import debug, entityNaming
-from shotgun_replica import config, factories, connectors
+from shotgun_replica import config, factories, connectors, thumbnails
 
-from shotgun_api3.lib.httplib2 import Http
 import shotgun_api3
 
-import os
 import re
 from shotgun_replica.sync import sync_settings
 
@@ -270,13 +268,10 @@ class EventProcessor( object ):
                         self.src.delete( entity )
 
         elif attrib_data['data_type']['value'] == 'image':
-            val = self.sg.find_one( self.obj_type,
-                                   filters = [['id', 'is', self.event['entity']['id']]],
-                                   fields = [event['meta']['attribute_name']] )
-            imageUrl = val[event['meta']['attribute_name']]
+            imageUrl = thumbnails.getUrlAndStoreLocally( self.obj_type, 
+                                                           self.event['entity']['id'], 
+                                                           event['meta']['attribute_name'])
             changes[event['meta']['attribute_name']] = imageUrl
-            if imageUrl != None:
-                saveShotgunImageLocally( imageUrl )
         else:
             debug.debug( "   changing attribute: " + event['meta']['attribute_name'] )
             changes[event['meta']['attribute_name']] = event['meta']['new_value']
@@ -375,36 +370,6 @@ class EventProcessor( object ):
 
         return EVENT_OK
 
-
-def getPathFromImageUrl( url ):
-    """return path from image url"""
-    url = url.replace( "https://", "" )
-    url = url.replace( "http://", "" )
-    pathElements = url.split( "/" )
-    server = pathElements[0]
-    filename = pathElements[len( pathElements ) - 1]
-    path = os.sep.join( pathElements[1:( len( pathElements ) - 1 )] )
-    return [server, path, filename]
-
-def getAbsShotgunImagePath( path, filename ):
-    """get shotgun image path locally"""
-    thepath = os.path.join( config.SHOTGUN_LOCAL_THUMBFOLDER, path )
-    if not ( os.path.isdir( thepath ) ):
-        os.makedirs( thepath )
-    return os.path.join( thepath, filename )
-
-def saveShotgunImageLocally( url ):
-    """save shotgun image locally"""
-    http = Http()
-    [response, content] = http.request( url, "GET" )
-    debug.debug( response )
-    [server, path, filename] = getPathFromImageUrl( url ) #IGNORE:W0612
-
-    savedAt = getAbsShotgunImagePath( path, filename )
-    debug.debug( savedAt )
-    imagefile = open( savedAt, "w" )
-    imagefile.write( content )
-    imagefile.close()
 
 if __name__ == "__main__":
     es = EventSpooler()

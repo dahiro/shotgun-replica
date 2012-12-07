@@ -4,7 +4,7 @@ from shotgun_api3.shotgun import Shotgun
 from elefant.utilities import config
 from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes
 from shotgun_replica.utilities import debug
-from shotgun_replica.sync import sync_settings
+from shotgun_replica.sync import sync_settings, thumbnails
 
 # leave empty for every entity to be checked
 UPDATE_ONLY = [ ]
@@ -61,6 +61,9 @@ def importEntities( conn, cur, sg ):
                 convFunc = connectors.getConversionSg2Pg( sgType )
                 if convFunc != None:
                     names.append( "\"%s\"" % fieldName )
+                    if sgType == "image" and obj[fieldName] != None:
+                        thumbnails.saveShotgunImageLocally( obj[fieldName] )
+                    
                     if sgType == "multi_entity":
                         reprs.append( "%s::entity_sync[]" )
                     else:

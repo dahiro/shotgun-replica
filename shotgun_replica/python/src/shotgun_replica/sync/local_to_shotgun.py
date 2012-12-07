@@ -70,7 +70,7 @@ class LocalDBEventSpooler( object ):
 
         query = "SELECT * FROM \"ChangeEventsToShotgun\" WHERE  NOT processed"
         if onlyEventIDs != None:
-            query += " id = ANY(%s)"
+            query += " AND id = ANY(%s)"
             query += " ORDER BY created ASC, id ASC"
             self.cur.execute( query, (onlyEventIDs, ) )
         else:
@@ -126,10 +126,10 @@ class LocalDBEventSpooler( object ):
 
         return success
 
-    def connectAndRun( self, localEvents = None ):
+    def connectAndRun( self, onlyEventIDs = None ):
         if self._connect():
             self.cur = self.src.con.cursor()
-            returner = self.queryAndProcess( localEvents )
+            returner = self.queryAndProcess( onlyEventIDs )
             self.src.con.commit()
             self.cur.close()
             return returner

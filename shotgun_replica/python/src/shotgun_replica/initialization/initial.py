@@ -2,9 +2,9 @@
 
 from shotgun_api3.shotgun import Shotgun
 from elefant.utilities import config
-from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes
+from shotgun_replica import cleanSysName, connectors, _create_shotgun_classes, thumbnails
 from shotgun_replica.utilities import debug
-from shotgun_replica.sync import sync_settings, thumbnails
+from shotgun_replica.sync import sync_settings
 
 # leave empty for every entity to be checked
 UPDATE_ONLY = [ ]

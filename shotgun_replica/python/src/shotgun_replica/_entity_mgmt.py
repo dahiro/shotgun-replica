@@ -8,6 +8,7 @@ import shotgun_replica
 import datetime
 from shotgun_replica.utilities import debug
 from shotgun_replica.connectors import PostgresEntityType
+import json
 
 class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
     """
@@ -285,6 +286,13 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                     return factories.getObject( entityObj.type,
                                                 remote_id = entityObj.remote_id,
                                                 local_id = entityObj.local_id )
+                else:
+                    return entityObj
+            elif fielddef[name]["data_type"]["value"] == "serializable":
+                entityObj = fieldvalue
+
+                if type( entityObj ) in [ unicode, str ]:
+                    return json.loads( entityObj )
                 else:
                     return entityObj
             elif fielddef[name]["data_type"]["value"] == "multi_entity":

@@ -314,6 +314,9 @@ class EventProcessor( object ):
         debug.debug( "   meta: " )
         debug.debug( self.event )
 
+        if self.obj_type in connectors.IGNORE_SHOTGUN_TYPES:
+            return EVENT_OK
+
         detAttribs = connectors.getClassOfType( self.obj_type ).shotgun_fields
 
         if self.event['entity'] == None:

@@ -62,7 +62,8 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
             "checkbox",
             "url",
             "uuid",
-            "color"]:
+            "color",
+            "serializable"]:
             classString += "    %s = None\n" % field
         elif fieldDefs[field]["data_type"]["value"] in ["pivot_column",
             "password",
@@ -134,7 +135,6 @@ def _getDBFields( entityType, entityName ):
 def _createDBFields( entitycode, fieldDefs, entityname ):
 
     conn = connectors.getDBConnection()
-    queryCur = conn.cursor()
     createCur = conn.cursor()
 
     dbFields = _getDBFields( entitycode, entityname )

@@ -22,6 +22,13 @@ from shotgun_replica.sync import shotgun_to_local
 NEWVALUE = "rdy"
 OLDVALUE = "wtg"
 
+START_DATE = "2012-01-15"
+END_DATE = "2012-02-16"
+
+SPLIT_NEW = [{'start': START_DATE, 'end': '2012-02-01'},
+             {'start': '2012-02-05', 'end': END_DATE}]
+SPLIT_OLD = []
+
 class Test( unittest.TestCase ):
 
     def setUp( self ):
@@ -33,8 +40,12 @@ class Test( unittest.TestCase ):
 
     def tearDown( self ):
         task = getObject( "Task", remote_id = testTaskID )
-        changeEntity( task, {"sg_status_list": OLDVALUE} )
-        self.sg.update( "Task", testTaskID, {"sg_status_list": OLDVALUE} )
+        # changeEntity( task, {"sg_status_list": OLDVALUE} )
+        self.sg.update( "Task", testTaskID, {"sg_status_list": OLDVALUE,
+                                             "splits": SPLIT_OLD,
+                                             "start_date": START_DATE,
+                                             "due_date": END_DATE } )
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
     def testSyncomaniaSettingsChange( self ):
         lastevent = self.sg.find( 
@@ -66,11 +77,26 @@ class Test( unittest.TestCase ):
         self.failUnlessEqual( newevent["entity"]["id"], testTaskID )
         self.failUnlessEqual( newevent["meta"]["new_value"], NEWVALUE )
         self.failUnlessEqual( newevent["id"], lastID + 1 )
-        
+
         self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
         task = getObject( "Task", remote_id = testTaskID )
         self.assertEqual( NEWVALUE, task.sg_status_list )
+
+    def testSyncomaniaSplitsChange( self ):
+        task = getObject( "Task", remote_id = testTaskID )
+        self.assertEqual( 11520, task.duration.days * 24 * 60 )
+
+        ret = self.sg.update( "Task", testTaskID, {"splits": SPLIT_NEW} )
+        debug.debug( ret )
+
+        self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
+
+        task = getObject( "Task", remote_id = testTaskID )
+        self.assertEqual( 10080, task.duration.days * 24 * 60 )
+        self.assertEqual( len( task.splits ), 2 )
+        self.assertTrue( task.splits[0].has_key("start") )
+        self.assertTrue( task.splits[0].has_key("end") )
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

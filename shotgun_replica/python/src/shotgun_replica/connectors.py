@@ -17,7 +17,7 @@ from shotgun_replica.utilities import debug
 
 con = None
 
-IGNORE_SHOTGUN_TYPES = [ "AppWelcome", "PermissionRuleSet", "Banner", "Icon" ]
+IGNORE_SHOTGUN_TYPES = [ "AppWelcome", "PermissionRuleSet", "Banner", "BannerUserConnection", "Icon" ]
 
 def __adapt_entity( entity ):
     return AsIs( "ROW(%s, %s, %s)::entity_sync" % ( adapt( entity.type ),
@@ -114,6 +114,8 @@ def getPgType( shotgunType ):
         return "text"
     elif shotgunType == "entity_type":
         return "text"
+    elif shotgunType == "serializable":
+        return "text"
     elif shotgunType == "summary":
         debug.debug( "%s not yet handled" % shotgunType )
     else:
@@ -164,6 +166,13 @@ def getConversionSg2Pg( sgType ):
     elif sgType == "entity":
         return getPgObj
     elif sgType == "url":
+        def func( val ):
+            if val != None:
+                return json.dumps( val )
+            else:
+                return None
+        return func
+    elif sgType == "serializable":
         def func( val ):
             if val != None:
                 return json.dumps( val )

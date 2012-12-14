@@ -25,6 +25,7 @@ class Test( unittest.TestCase ):
 
         self.testassetlibrary = factories.getObject( entities.AssetLibrary().getType(),
                                                      remote_id = commanda.TEST_ASSETLIBRARY_ID )
+
         self.task = factories.getObject( "Task", remote_id = tests_elefant.testTaskID )
 
         self.testasset = tests_elefant.createTestAsset( self.testassetlibrary )
@@ -45,16 +46,16 @@ class Test( unittest.TestCase ):
         self.testasset.save()
 
         # get connection objects from source
-        connObj = factories.getConnectionObj( targetObj = self.testasset,
-                                              sourceObj = self.linkedAsset,
+        connObj = factories.getConnectionObj( baseObj = self.testasset,
+                                              linkedObj = self.linkedAsset,
                                               attribute = "assets" )
         self.assertNotEqual( connObj, None )
 
         # TODO: synch and check if not two connObj
         # 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
-        connObj = factories.getConnectionObj( targetObj = self.testasset,
-                                              sourceObj = self.linkedAsset,
+        connObj = factories.getConnectionObj( baseObj = self.testasset,
+                                              linkedObj = self.linkedAsset,
                                               attribute = "assets" )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
@@ -68,8 +69,8 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( targetObj = self.testasset,
-                                              sourceObj = self.linkedAsset,
+        connObj = factories.getConnectionObj( baseObj = self.testasset,
+                                              linkedObj = self.linkedAsset,
                                               attribute = "assets" )
         self.assertNotEqual( type( connObj ), list, "multiple connection objects after synch" )
 
@@ -78,8 +79,8 @@ class Test( unittest.TestCase ):
         self.testasset.assets = [ ]
         self.testasset.save()
 
-        connObj = factories.getConnectionObj( targetObj = self.testasset,
-                                              sourceObj = self.linkedAsset,
+        connObj = factories.getConnectionObj( baseObj = self.testasset,
+                                              linkedObj = self.linkedAsset,
                                               attribute = "assets" )
         self.assertEqual( connObj, None )
 
@@ -89,8 +90,8 @@ class Test( unittest.TestCase ):
 
         self.assertTrue( self.local2shotgun.connectAndRun(), "synch not successful" )
 
-        connObj = factories.getConnectionObj( targetObj = self.testasset,
-                                              sourceObj = self.linkedAsset,
+        connObj = factories.getConnectionObj( baseObj = self.testasset,
+                                              linkedObj = self.linkedAsset,
                                               attribute = "assets" )
         self.assertEqual( connObj, None )
 

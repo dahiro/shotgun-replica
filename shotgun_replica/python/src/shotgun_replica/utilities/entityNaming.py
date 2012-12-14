@@ -30,24 +30,27 @@ def getConnectionEntityName( entityType, attribute ):
     else:
         return None
 
-def getConnectionEntityAttrName( srcEntityType, destEntityType, connEntityName ):
+def getConnectionEntityAttrName( baseEntityType, linkedEntityType, connEntityName ):
     """return the attribute-names of the connection-entity"""
 
-    srcAttrName = replaceCapitalsWithUnderscores( srcEntityType )
-    dstAttrName = replaceCapitalsWithUnderscores( destEntityType )
+    baseAttrName = replaceCapitalsWithUnderscores( baseEntityType )
+    linkedAttrName = replaceCapitalsWithUnderscores( linkedEntityType )
 
-    if srcAttrName != dstAttrName:
-        return ( srcAttrName, dstAttrName )
+    debug.debug( ( baseAttrName, linkedAttrName ) )
+
+    if baseAttrName != linkedAttrName:
+        return ( baseAttrName, linkedAttrName )
     else:
         theclass = connectors.getClassOfType( connEntityName )
 
-        srcAttrNamePrefixed = "source_" + srcAttrName
-        dstAttrNamePrefixed = "dest_" + dstAttrName
+        baseAttrNamePrefixed = "source_" + baseAttrName
+        linkedAttrNamePrefixed = "dest_" + linkedAttrName
 
-        if theclass.shotgun_fields.has_key( srcAttrNamePrefixed ) and theclass.shotgun_fields.has_key( dstAttrNamePrefixed ):
-            return ( srcAttrNamePrefixed, dstAttrNamePrefixed )
-        elif theclass.shotgun_fields.has_key( srcAttrName ) and theclass.shotgun_fields.has_key( "parent" ):
-            return ( srcAttrName, "parent" )
+        if theclass.shotgun_fields.has_key( baseAttrNamePrefixed ) and theclass.shotgun_fields.has_key( linkedAttrNamePrefixed ):
+            debug.debug( ( baseAttrNamePrefixed, linkedAttrNamePrefixed ) )
+            return ( baseAttrNamePrefixed, linkedAttrNamePrefixed )
+        elif theclass.shotgun_fields.has_key( baseAttrName ) and theclass.shotgun_fields.has_key( "parent" ):
+            return ( baseAttrName, "parent" )
 
 def replaceCapitalsWithUnderscores( name ):
     """return the name of an attribute that is a backlink"""
@@ -73,10 +76,10 @@ def replaceUnderscoresWithCapitals( name ):
 
 def getReverseAttributeName( entityType, attr ):
     """return the name of an attribute that is a backlink"""
-    
-    if entityType=="Asset" and attr == "assets":
+
+    if entityType == "Asset" and attr == "assets":
         return "parents"
-    elif entityType=="Shot" and attr == "shots":
+    elif entityType == "Shot" and attr == "shots":
         return "parent_shots"
     else:
         entityQuoted = replaceCapitalsWithUnderscores( entityType )

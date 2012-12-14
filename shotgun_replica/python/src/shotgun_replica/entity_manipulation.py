@@ -52,7 +52,7 @@ def removeCreatedChangeEvents():
     """
     global CREATED_CHANGE_EVENTS
 
-    debug.debug( CREATED_CHANGE_EVENTS )
+#    debug.debug( CREATED_CHANGE_EVENTS )
 
     src = connectors.DatabaseModificator()
     cur = src.con.cursor()
@@ -116,63 +116,65 @@ def changeEntity( myObj, changes ):
             if connEntityName != None:
 
                 reverseAttribute = entityNaming.getReverseAttributeName( entityType, attributeName )
-                targetType = myObj.shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
+                linkedEntityType = myObj.shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
+                baseEntityType = entityType
 
-                ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType,
-                                                                                         targetType,
+                ( baseAttrName, linkedAttrName ) = entityNaming.getConnectionEntityAttrName( baseEntityType,
+                                                                                         linkedEntityType,
                                                                                          connEntityName )
 
-                tgPgObj = myObj.getPgObj()
+                basePgObj = myObj.getPgObj()
 
                 # get connections
-                filters = "%s=%s" % ( dstAttrName,
+                filters = "%s=%s" % ( baseAttrName,
                                       "%s"
                                       )
-                filterValues = [ tgPgObj ]
+                filterValues = [ basePgObj ]
                 connections = factories.getObjects( connEntityName,
                                                     filters,
                                                     filterValues )
 
                 # create new connection entities
-                for targetDict in changes[key]:
-                    srcPostgresObj = getPgObj( targetDict )
-                    fieldNames = [ dstAttrName, srcAttrName ]
-                    fieldValues = [ tgPgObj, srcPostgresObj ]
+                for linkedDict in changes[key]:
+                    linkedPostgresObj = getPgObj( linkedDict )
+                    fieldNames = [ baseAttrName, linkedAttrName ]
+                    fieldValues = [ basePgObj, linkedPostgresObj ]
 
                     # check if existing first
                     connectionExists = False
                     for i in range( len( connections ) ):
                         connection = connections[i]
-                        if connection.getRawField( srcAttrName ) == srcPostgresObj:
+                        if connection.getRawField( linkedAttrName ) == linkedPostgresObj:
                             connections.remove( connection )
                             connectionExists = True
                             break
 
                     if not connectionExists:
+                        debug.debug( dict( zip( fieldNames, fieldValues ) ), prefix = "OOOOOOOOO" )
                         src._addToDatabase( connEntityName, fieldValues, fieldNames )
 
                     # setting reverse attribute as well
-                    targetObj = factories.getObject( targetDict["type"],
-                                                     local_id = targetDict["__local_id"],
-                                                     remote_id = targetDict["id"] )
-                    retValues = targetObj.getRawField( reverseAttribute )
+                    linkedObj = factories.getObject( linkedDict["type"],
+                                                     local_id = linkedDict["__local_id"],
+                                                     remote_id = linkedDict["id"] )
+                    retValues = linkedObj.getRawField( reverseAttribute )
 
                     if retValues == None:
                         retValues = []
 
-                    if tgPgObj not in retValues:
-                        retValues.append( tgPgObj )
-                        src.changeInDB( targetObj, reverseAttribute, retValues )
+                    if basePgObj not in retValues:
+                        retValues.append( basePgObj )
+                        src.changeInDB( linkedObj, reverseAttribute, retValues )
 
 
                 # delete unused connection entities
 
                 for connection in connections:
-                    targetObj = connection.getField( srcAttrName )
-                    retValues = targetObj.getRawField( reverseAttribute )
+                    linkedObj = connection.getField( linkedAttrName )
+                    retValues = linkedObj.getRawField( reverseAttribute )
 
-                    retValues.remove( tgPgObj )
-                    src.changeInDB( targetObj, reverseAttribute, retValues )
+                    retValues.remove( basePgObj )
+                    src.changeInDB( linkedObj, reverseAttribute, retValues )
                     src.delete( connection )
 
 

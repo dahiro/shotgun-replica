@@ -34,6 +34,7 @@ class Test( unittest.TestCase ):
         testPairs = [
             ( "Asset", "assets", "AssetAssetConnection" ),
             ( "Asset", "sg_linked_assets", "Asset_sg_linked_assets_Connection" ),
+            ( "Asset", "sg_linked_shots", "Asset_sg_linked_shots_Connection" ),
             ( "Asset", "shoot_days", "AssetShootDayConnection" )
         ]
 
@@ -49,8 +50,10 @@ class Test( unittest.TestCase ):
             ( "Revision", "Revision", "RevisionRevisionConnection", "source_revision", "dest_revision"),
         ]
 
-        for ( srcEntityType, destEntityType, connEntityName, srcAttrName, destAttrName ) in testPairs:
-            ( srcAttrNameTest, destAttrNameTest ) = entityNaming.getConnectionEntityAttrName( srcEntityType, destEntityType, connEntityName )
+        for ( baseEntityType, linkedEntityType, connEntityName, srcAttrName, destAttrName ) in testPairs:
+            ( srcAttrNameTest, destAttrNameTest ) = entityNaming.getConnectionEntityAttrName( baseEntityType, 
+                                                                                              linkedEntityType, 
+                                                                                              connEntityName )
             self.assertEqual( srcAttrNameTest, srcAttrName )
             self.assertEqual( destAttrNameTest, destAttrName )
 

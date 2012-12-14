@@ -64,23 +64,23 @@ def getObjects( entityType, filters, filterValues, orderby = None, limit = None,
     return resultList
 
 
-def getConnectionObj( targetObj, sourceObj, attribute ):
+def getConnectionObj( baseObj, linkedObj, attribute ):
     """
     return the connection obj of two connected entities
     """
-    connEntityName = entityNaming.getConnectionEntityName( sourceObj.getType(), attribute )
+    connEntityName = entityNaming.getConnectionEntityName( baseObj.getType(), attribute )
 
     if connEntityName:
-        ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( sourceObj.getType(),
-                                                                                 targetObj.getType(),
+        ( baseAttrName, linkedAttrName ) = entityNaming.getConnectionEntityAttrName( baseObj.getType(),
+                                                                                 linkedObj.getType(),
                                                                                  connEntityName )
 
-        filters = "%s=%s and %s=%s" % ( srcAttrName,
+        filters = "%s=%s and %s=%s" % ( baseAttrName,
                                         "%s",
-                                        dstAttrName,
+                                        linkedAttrName,
                                         "%s"
                                       )
-        filterValues = [ sourceObj.getPgObj(), targetObj.getPgObj() ]
+        filterValues = [ baseObj.getPgObj(), linkedObj.getPgObj() ]
 
         objs = getObjects( connEntityName, filters, filterValues )
         if len( objs ) == 1:

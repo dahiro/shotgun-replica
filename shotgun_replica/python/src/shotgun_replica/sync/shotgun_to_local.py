@@ -268,9 +268,9 @@ class EventProcessor( object ):
                         self.src.delete( entity )
 
         elif attrib_data['data_type']['value'] == 'image':
-            imageUrl = thumbnails.getUrlAndStoreLocally( self.obj_type, 
-                                                           self.event['entity']['id'], 
-                                                           event['meta']['attribute_name'])
+            imageUrl = thumbnails.getUrlAndStoreLocally( self.obj_type,
+                                                           self.event['entity']['id'],
+                                                           event['meta']['attribute_name'] )
             changes[event['meta']['attribute_name']] = imageUrl
         else:
             debug.debug( "   changing attribute: " + event['meta']['attribute_name'] )
@@ -334,6 +334,8 @@ class EventProcessor( object ):
                                 filters = [['id', 'is', self.event['entity']['id']]],
                                 fields = detAttribs.keys() )
 
+        debug.debug( item, prefix = ">>>>>>>>>" )
+
         if item == None:
             debug.debug( "no entity to work on - deleted already?", debug.INFO )
             return EVENT_UNKNOWN
@@ -348,9 +350,9 @@ class EventProcessor( object ):
                 ( entityType, attributeName, dummy ) = re.sub( r"([A-Z])", r",\1", self.obj_type ).split( "," )[1:]
                 attributeName = attributeName.lower() + "s"
 
-            destEntityType = connectors.getClassOfType( entityType ).shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
+            linkedEntityType = connectors.getClassOfType( entityType ).shotgun_fields[attributeName]["properties"]["valid_types"]["value"][0]
 
-            ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, destEntityType, self.obj_type )
+            ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, linkedEntityType, self.obj_type )
 
             filters = "%s=%s and %s=%s" % ( srcAttrName,
                                             "%s",

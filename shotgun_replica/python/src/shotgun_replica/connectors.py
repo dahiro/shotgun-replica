@@ -272,6 +272,12 @@ class PostgresEntityType( object ):
             "id": self.remote_id,
             "__local_id": self.local_id,
         }
+    
+    def getLocalID(self):
+        return self.local_id
+    
+    def getRemoteID(self):
+        return self.remote_id
 
     def __cmp__( self, objB ):
         if objB == None:

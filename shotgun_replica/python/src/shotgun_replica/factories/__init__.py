@@ -16,10 +16,12 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     
     @return: the object or None if object not available
     """
+    classObj = entityType
 
-    classObj = connectors.getClassOfType( entityType )
-    if not classObj:
-        return None
+    if type(entityType) == str:
+        classObj = connectors.getClassOfType( entityType )
+        if not classObj:
+            return None
 
     tableName = classObj._type
 

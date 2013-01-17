@@ -283,9 +283,12 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                 entityObj = fieldvalue
 
                 if type( entityObj ) == connectors.PostgresEntityType:
-                    return factories.getObject( entityObj.type,
-                                                remote_id = entityObj.remote_id,
-                                                local_id = entityObj.local_id )
+
+                    origvalue = factories.getObject( entityObj.type,
+                                                     remote_id = entityObj.remote_id,
+                                                     local_id = entityObj.local_id )
+                    object.__setattr__( self, name, origvalue )
+                    return origvalue
                 else:
                     return entityObj
             elif fielddef[name]["data_type"]["value"] == "serializable":
@@ -312,6 +315,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                             entityList.append( obj )
                     else:
                         entityList.append( entityObj )
+                
+                object.__setattr__( self, name, entityList )
+
                 return entityList
 
         return fieldvalue

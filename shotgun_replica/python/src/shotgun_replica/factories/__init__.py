@@ -18,7 +18,7 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     """
     classObj = entityType
 
-    if type(entityType) == str:
+    if type( entityType ) == str or type( entityType ) == unicode:
         classObj = connectors.getClassOfType( entityType )
         if not classObj:
             return None

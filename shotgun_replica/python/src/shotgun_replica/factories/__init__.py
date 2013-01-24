@@ -49,14 +49,18 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     else:
         return None
 
-def getObjects( entityType, filters, filterValues, orderby = None, limit = None, includeRetireds = False ):
+def getObjects( entityType, filters = None, filterValues = None, orderby = None, limit = None, includeRetireds = False ):
     dbc = connectors.DatabaseModificator()
     pgFilterValues = []
-    for filterValue in filterValues:
-        pgFilterValues.append( connectors.getPgObj( filterValue ) )
+    if filterValues != None:
+        for filterValue in filterValues:
+            pgFilterValues.append( connectors.getPgObj( filterValue ) )
 
     if not includeRetireds:
-        filters = "NOT __retired AND ( " + filters + " )"
+        if filters == None:
+            filters = "NOT __retired"
+        else:
+            filters = "NOT __retired AND ( " + filters + " )"
 
     resultList = dbc.getListOfEntities( entityType,
                                         filters,
@@ -90,3 +94,73 @@ def getConnectionObj( baseObj, linkedObj, attribute ):
         elif len( objs ) > 1:
             return objs
     return None
+
+
+def getListOfClients():
+    """ return list of Projects """
+    return ShotgunReplicaConnector()._getListOfEntities( Client, order = "code" )
+
+def getListOfProjects():
+    """ return list of Projects """
+    # return ShotgunReplicaConnector()._getListOfEntities(Project, order = "name")
+    return ShotgunReplicaConnector()._getListOfEntities( Project, order = "name", filterquery = "sg_pipelineVersion IS NULL" )
+
+def getListOfAllProjects():
+    """ return list of all Projects
+    @deprecated:  take care on using this method
+    """
+    # return ShotgunReplicaConnector()._getListOfEntities(Project, order = "name")
+    return ShotgunReplicaConnector()._getListOfEntities( Project, order = "name" )
+
+def getListOfMyProjects():
+    """ return list of Projects """
+    myself = Entity( "HumanUser",
+                    Configuration().get( CONF_SHOTGUN_USERID ) )
+
+    return ShotgunReplicaConnector()._getListOfEntities( Project,
+                                                         filterquery = "%s = ANY(users) and sg_pipelineVersion IS NULL",
+                                                         variables = ( myself, ),
+                                                         order = 'name' )
+
+def getListOfTemplates( templateType ):
+    """ return list of Task Templates"""
+    return ShotgunReplicaConnector()._getListOfEntities( TaskTemplate,
+                                                        order = "code",
+                                                        filterquery = "entity_type = %s",
+                                                        variables = ( templateType, ) )
+
+def getListOfFileFormats():
+    """ return list of FileFormat-Objects"""
+    return ShotgunReplicaConnector()._getListOfEntities( FileFormat,
+                                                        order = "code" )
+
+def getFileFormats( name ):
+    """ return list of FileFormat-Objects with corresponding name"""
+    return ShotgunReplicaConnector()._getListOfEntities( FileFormat,
+                                                        order = "code",
+                                                        filterquery = "code = %s",
+                                                        variables = ( name, ) )
+
+def getListOfLUTs( name ):
+    """ return list of LUT-Objects with corresponding name"""
+    return ShotgunReplicaConnector()._getListOfEntities( LUT,
+                                                        order = "code")
+
+def getListOfImageSizes():
+    """ return list of ImageSize-Objects"""
+    return ShotgunReplicaConnector()._getListOfEntities( ImageSize, order = "code" )
+
+def getImageSizes( name ):
+    """ return list of ImageSize-Objects with corresponding name"""
+    return ShotgunReplicaConnector()._getListOfEntities( ImageSize,
+                                                        order = "code",
+                                                        filterquery = "code = %s",
+                                                        variables = ( name, ) )
+
+def getListOfSteps( type = "Shot" ):
+    """ return list of Tools """
+    return ShotgunReplicaConnector()._getListOfEntities( Step,
+                                                        order = "list_order",
+                                                        filterquery = "entity_type = %s",
+                                                        variables = ( type, ) )
+

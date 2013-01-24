@@ -120,6 +120,9 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         """
         return self.__getattribute__( fieldname )
 
+    def hasField( self, fieldname ):
+        return hasattr( self, fieldname )
+
     def setField( self, fieldname, fieldvalue ):
         """
         set field value of this object
@@ -315,7 +318,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
                             entityList.append( obj )
                     else:
                         entityList.append( entityObj )
-                
+
                 object.__setattr__( self, name, entityList )
 
                 return entityList

@@ -11,9 +11,10 @@ import os
 import json
 from shotgun_replica.utilities import debug, entityNaming
 
+
 def getObject( entityType, local_id = None, remote_id = None, includeRetireds = False ):
     """ return object of a specific type
-    
+
     @return: the object or None if object not available
     """
     classObj = entityType
@@ -49,7 +50,19 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     else:
         return None
 
-def getObjects( entityType, filters = None, filterValues = None, orderby = None, limit = None, includeRetireds = False ):
+
+def getObjects( entityType, filters = None, filterValues = None, orderby = None,
+               limit = None, includeRetireds = False ):
+    """ return objects of a specific type
+
+    @return: the objects or [] if object not available
+    """
+
+    if type( entityType ) == str or type( entityType ) == unicode:
+        tableName = entityType
+    else:
+        tableName = entityType._type
+
     dbc = connectors.DatabaseModificator()
     pgFilterValues = []
     if filterValues != None:
@@ -62,11 +75,11 @@ def getObjects( entityType, filters = None, filterValues = None, orderby = None,
         else:
             filters = "NOT __retired AND ( " + filters + " )"
 
-    resultList = dbc.getListOfEntities( entityType,
-                                        filters,
-                                        variables = pgFilterValues,
-                                        order = orderby,
-                                        limit = limit )
+    resultList = dbc.getListOfEntities( tableName,
+                                       filters,
+                                       variables = pgFilterValues,
+                                       order = orderby,
+                                       limit = limit )
     return resultList
 
 

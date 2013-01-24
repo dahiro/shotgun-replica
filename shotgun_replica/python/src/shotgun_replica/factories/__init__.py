@@ -49,14 +49,18 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
     else:
         return None
 
-def getObjects( entityType, filters, filterValues, orderby = None, limit = None, includeRetireds = False ):
+def getObjects( entityType, filters = None, filterValues = None, orderby = None, limit = None, includeRetireds = False ):
     dbc = connectors.DatabaseModificator()
     pgFilterValues = []
-    for filterValue in filterValues:
-        pgFilterValues.append( connectors.getPgObj( filterValue ) )
+    if filterValues != None:
+        for filterValue in filterValues:
+            pgFilterValues.append( connectors.getPgObj( filterValue ) )
 
     if not includeRetireds:
-        filters = "NOT __retired AND ( " + filters + " )"
+        if filters == None:
+            filters = "NOT __retired"
+        else:
+            filters = "NOT __retired AND ( " + filters + " )"
 
     resultList = dbc.getListOfEntities( entityType,
                                         filters,

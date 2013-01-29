@@ -570,6 +570,10 @@ def getDBConnection():
                                 database = config.DB_DATABASE,
                                 user = config.DB_USERNAME,
                                 password = config.DB_PASSWORD )
+
+        psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+        psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+        
         con.set_isolation_level( psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT )
 
         register_adapter( PostgresEntityType, __adapt_entity )

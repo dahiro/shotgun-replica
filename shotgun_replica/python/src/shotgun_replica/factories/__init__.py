@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Created on 21.05.2012
-
-@author: bach
+module to retrieve entities from the database
 '''
 
 from shotgun_replica import connectors, base_entity, UNKNOWN_SHOTGUN_ID
@@ -13,9 +11,17 @@ from shotgun_replica.utilities import debug, entityNaming
 
 
 def getObject( entityType, local_id = None, remote_id = None, includeRetireds = False ):
-    """ return object of a specific type
+    """ return entity of a specific type with given IDs
 
-    @return: the object or None if object not available
+    :py:class:`shotgun_replica.entities.Task`
+
+    :param entityType: either a entities-class or a string (ex. "CustomEntity22")
+    :type entityType: class or str
+    :param local_id: the local id of the object
+    :param remote_id: the remote id (shotgun) of the object
+    :param includeRetireds: include retired (deleted) objects
+    
+    :rtype: object or None if object not available
     """
     classObj = entityType
 
@@ -54,8 +60,16 @@ def getObject( entityType, local_id = None, remote_id = None, includeRetireds = 
 def getObjects( entityType, filters = None, filterValues = None, orderby = None,
                limit = None, includeRetireds = False ):
     """ return objects of a specific type
-
-    @return: the objects or [] if object not available
+    
+    :param entityType: either a entities-class or a string (ex. "CustomEntity22")
+    :type entityType: class or str
+    :param filters: string with SQL-style filters (example "sg_link=%s")
+    :param filterValues: list with variables that are passed to the sql-statement for %x-style variables
+    :param orderby: SQL-ish order-by-string
+    :param limit:  SQL-ish limit-string
+    :param includeRetireds: include retired (deleted) objects
+    
+    :rtype: array with matching entities
     """
 
     if type( entityType ) == str or type( entityType ) == unicode:
@@ -86,6 +100,10 @@ def getObjects( entityType, filters = None, filterValues = None, orderby = None,
 def getConnectionObj( baseObj, linkedObj, attribute ):
     """
     return the connection obj of two connected entities
+    
+    :param baseObj:   entity that has the given attribute
+    :param linkedObj: entity that is linked in the given attribute
+    :param attribute: attribute name of baseObj-parameter
     """
     connEntityName = entityNaming.getConnectionEntityName( baseObj.getType(), attribute )
 

@@ -1,8 +1,9 @@
-'''
-Created on Dec 7, 2012
+# -*- coding: utf-8 -*-
 
-@author: bach
 '''
+handling thumbnailing
+'''
+
 from shotgun_replica import config
 import shotgun_api3
 import os

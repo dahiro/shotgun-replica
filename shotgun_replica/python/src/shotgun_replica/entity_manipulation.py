@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 '''
-Created on Jun 20, 2012
-
-@author: bach
+handling entity manipulations that get synced back to shotgun
 '''
+
 import datetime
 import json
 from shotgun_replica import connectors, base_entity, factories

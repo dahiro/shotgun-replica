@@ -1,8 +1,9 @@
-'''
-Created on Aug 24, 2012
+# -*- coding: utf-8 -*-
 
-@author: bach
 '''
+module handling debugging
+'''
+
 from shotgun_replica import config
 import time
 import sys

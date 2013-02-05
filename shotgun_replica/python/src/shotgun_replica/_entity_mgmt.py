@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+'''
+general methods of shotgun-entities
+'''
+
 from shotgun_replica import entity_manipulation, UNKNOWN_SHOTGUN_ID, \
     factories, connectors
 from shotgun_replica import base_entity

@@ -1,8 +1,9 @@
-'''
-Created on Aug 23, 2012
+# -*- coding: utf-8 -*-
 
-@author: bach
 '''
+hanlding key/value configurations of the database
+'''
+
 from shotgun_replica import connectors
 import json
 

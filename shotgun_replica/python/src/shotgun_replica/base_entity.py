@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 '''
-Created on Jul 30, 2012
-
-@author: bach
+shotgun-base-entity
 '''
+
 
 
 class ShotgunBaseEntity( object ):

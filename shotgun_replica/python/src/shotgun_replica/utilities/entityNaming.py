@@ -1,8 +1,9 @@
-'''
-Created on Oct 17, 2012
+# -*- coding: utf-8 -*-
 
-@author: bach
 '''
+module that models the naming "conventions" in shotgun
+'''
+
 import re
 import shotgun_replica
 #from  import entities

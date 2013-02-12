@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
-"""
-creates the auto generated entity-classes
-"""
+## creates the auto generated entity-classes
+#
+#
 
 from shotgun_api3.shotgun import Shotgun
 from pprint import pprint, pformat
@@ -194,7 +193,9 @@ def main():
 
     moduleString = """# -*- coding: utf-8 -*-
 
-\""" 
+\"""@package shotgun_replica.entities
+Shotgun Entities
+
 THIS FILE IS AUTO GENERATED
 
 DO NOT EDIT IT DIRECTLY

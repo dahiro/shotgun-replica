@@ -215,6 +215,7 @@ class LocalDBEventSpooler( object ):
                         # Connection-Entities need first the corresponding remote-id
                         # they get that by the shotgun-event triggered by the event that causes this connection-entity to be created
                         # so we simply have to wait and do nothing (hopefully ;)
+                        debug.info( "waiting for a connection-entitiy to appear %s" % ( str( entityObj ),  ) )
                         return True
 
                 self.sg.update( entityObj.getType(), entityObj.getRemoteID(), data )

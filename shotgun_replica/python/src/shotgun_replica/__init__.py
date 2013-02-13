@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
+
+## @package shotgun_replica
+# Synchronization of Shotgun with local Postgresql
+#
+#
 
 import re
 
 UNKNOWN_SHOTGUN_ID = -1
 
 def cleanSysName(name):
-    """
-    replace non-normal char or whitespace with capital following character
+    """ replace non-normal char or whitespace with capital following character
     english this good being"""
     
     def whitespacerepl(match):

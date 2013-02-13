@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//python/src/shotgun_replica/__init__.py=utf-8
 encoding//python/src/shotgun_replica/_create_shotgun_classes.py=utf-8
 encoding//python/src/shotgun_replica/_entity_mgmt.py=utf-8
 encoding//python/src/shotgun_replica/_fieldDefinitions.py=utf-8

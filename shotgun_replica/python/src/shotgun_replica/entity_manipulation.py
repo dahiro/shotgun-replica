@@ -55,7 +55,9 @@ def removeCreatedChangeEvents():
 
     src = connectors.DatabaseModificator()
     cur = src.con.cursor()
-    cur.execute( "DELETE FROM \"ChangeEventsToShotgun\" WHERE id = ANY(%s)", ( CREATED_CHANGE_EVENTS, ) )
+    cur.execute( "DELETE FROM \"ChangeEventsToShotgun\" WHERE id = ANY(%s) AND task != %s", ( CREATED_CHANGE_EVENTS, 
+                                                                                              "deletion", ) )
+    
     CREATED_CHANGE_EVENTS = []
 
 

@@ -26,5 +26,3 @@ class Test( baseTest.NonGuiElefantBaseTest ):
         self.assertTrue( daurl.startswith( config.Configuration().get( config.CONF_SHOTGUN_URL ) ) )
         self.assertTrue( daurl.endswith( filename ) )
 
-        os.hans()
-        self.assertTrue(False)

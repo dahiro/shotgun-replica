@@ -332,12 +332,12 @@ class DatabaseModificator( object ):
             query += " LIMIT %s" % str( limit )
 
         if variables != None:
-            debug.debug( query )
-            debug.debug( variables )
-            debug.debug( cur.mogrify( query, variables ) )
+#            debug.debug( query )
+#            debug.debug( variables )
+#            debug.debug( cur.mogrify( query, variables ) )
             cur.execute( query, variables )
         else:
-            debug.debug( cur.mogrify( query ) )
+#            debug.debug( cur.mogrify( query ) )
             cur.execute( query )
 
         items = []

@@ -4,17 +4,20 @@
 handling thumbnailing
 '''
 
-from shotgun_replica import config
+from shotgun_replica import config as srconfig
 import shotgun_api3
 import os
 from shotgun_api3.lib.httplib2 import Http
 from shotgun_replica.utilities import debug
+from elefant.utilities import config
+import uuid
+import shutil
 
 def getUrlAndStoreLocally( entity_type, entity_id, attribute_name ):
 
-    sg = shotgun_api3.Shotgun( config.SHOTGUN_URL,
-                               config.SHOTGUN_BACKSYNC_SKRIPT,
-                               config.SHOTGUN_BACKSYNC_KEY )
+    sg = shotgun_api3.Shotgun( srconfig.SHOTGUN_URL,
+                               srconfig.SHOTGUN_BACKSYNC_SKRIPT,
+                               srconfig.SHOTGUN_BACKSYNC_KEY )
     val = sg.find_one( entity_type,
                        filters = [['id', 'is', entity_id]],
                        fields = [attribute_name] )
@@ -37,24 +40,37 @@ def __getPathFromImageUrl( url ):
 
 def __getAbsShotgunImagePath( path, filename ):
     """get shotgun image path locally"""
-    thepath = os.path.join( config.SHOTGUN_LOCAL_THUMBFOLDER, path )
+    thepath = os.path.join( srconfig.SHOTGUN_LOCAL_THUMBFOLDER, path )
     if not ( os.path.isdir( thepath ) ):
         os.makedirs( thepath )
     return os.path.join( thepath, filename )
 
+def createTestThumbnailPath( srcImage ):
+    """ store image in local thumbpath and return shotgun-url
+    """
+
+    url = config.Configuration().get( config.CONF_SHOTGUN_URL )
+    url += "/files/testfiles/" + str( uuid.uuid1() ) + "/"
+    url += os.path.basename( srcImage )
+    
+    localPath = getLocalThumbPath( url )
+    shutil.copy( srcImage, localPath )
+
+    return url
+
 def getLocalThumbPath( url ):
     """ translate thumbnail url to local path """
-    
-    if url==None:
+
+    if url == None:
         return None
     [path, filename] = __getPathFromImageUrl( url )
     return __getAbsShotgunImagePath( path, filename )
 
 def saveShotgunImageLocally( url ):
     """save shotgun image locally"""
-    if type(url) not in [str, unicode]:
+    if type( url ) not in [str, unicode]:
         return None
-    debug.debug("loading: "+url)
+    debug.debug( "loading: " + url )
 
     http = Http()
     [response, content] = http.request( url, "GET" )
@@ -66,5 +82,5 @@ def saveShotgunImageLocally( url ):
     imagefile = open( savedAt, "w" )
     imagefile.write( content )
     imagefile.close()
-    
+
     return savedAt

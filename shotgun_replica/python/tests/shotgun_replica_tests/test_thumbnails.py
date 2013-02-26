@@ -7,6 +7,7 @@ from tests_elefant import baseTest
 from elefant.utilities import config
 import os
 from shotgun_replica import thumbnails
+import shutil
 
 
 class Test( baseTest.NonGuiElefantBaseTest ):
@@ -26,3 +27,4 @@ class Test( baseTest.NonGuiElefantBaseTest ):
         self.assertTrue( daurl.startswith( config.Configuration().get( config.CONF_SHOTGUN_URL ) ) )
         self.assertTrue( daurl.endswith( filename ) )
 
+        shutil.rmtree( os.path.dirname( localPath ) )

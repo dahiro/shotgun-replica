@@ -288,5 +288,5 @@ class LocalDBEventSpooler( object ):
         else:
             exception = "Entity %s does not exist or has no remote_id" % ( str( entity ) )
             self._setProcessed( event, exception = exception )
-            return False
+            return True
 

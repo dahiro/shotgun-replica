@@ -278,6 +278,10 @@ class PostgresEntityType( object ):
     
     def getRemoteID(self):
         return self.remote_id
+    
+    def getLocalIdentifier(self):
+        return "%s_%d" % ( self.getType(),
+                           self.getLocalID() )
 
     def __cmp__( self, objB ):
         if objB == None:
@@ -332,12 +336,12 @@ class DatabaseModificator( object ):
             query += " LIMIT %s" % str( limit )
 
         if variables != None:
-            debug.debug( query )
-            debug.debug( variables )
-            debug.debug( cur.mogrify( query, variables ) )
+#            debug.debug( query )
+#            debug.debug( variables )
+#            debug.debug( cur.mogrify( query, variables ) )
             cur.execute( query, variables )
         else:
-            debug.debug( cur.mogrify( query ) )
+#            debug.debug( cur.mogrify( query ) )
             cur.execute( query )
 
         items = []

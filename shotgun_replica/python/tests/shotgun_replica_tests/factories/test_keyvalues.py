@@ -11,7 +11,7 @@ from shotgun_replica.factories import keyvalues
 class Test( unittest.TestCase ):
 
     def setUp( self ):
-        pass
+        thejson = keyvalues.setValue( keyvalues.KEY_TEST_VALUE, "testvalue" )
 
     def tearDown( self ):
         pass
@@ -22,7 +22,7 @@ class Test( unittest.TestCase ):
 
     def testTestValueRetrieval( self ):
         thejson = keyvalues.getValue( keyvalues.KEY_TEST_VALUE )
-        self.assertTrue( type( thejson ) == type( "" ), thejson )
+        self.assertTrue( type( thejson ) == unicode, thejson )
 
     def testSyncSettingsSetting( self ):
         thejson = keyvalues.getValue( keyvalues.KEY_SYNC_SETTINGS )

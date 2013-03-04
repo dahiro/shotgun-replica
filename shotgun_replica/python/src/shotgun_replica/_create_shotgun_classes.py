@@ -64,9 +64,9 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
             "serializable"]:
             doc = fieldDefs[field]["description"]["value"]
             if doc != "":
-                classString += "    # %s\n    %s = None\n\n" % ( doc, field, )
+                classString += "    ## %s\n    %s = None\n\n" % ( doc, field, )
             else:
-                classString += "    # undocumented field\n    %s = None\n\n" % ( field, )
+                classString += "    ## undocumented field\n    %s = None\n\n" % ( field, )
         elif fieldDefs[field]["data_type"]["value"] in ["pivot_column",
             "password",
             "summary",

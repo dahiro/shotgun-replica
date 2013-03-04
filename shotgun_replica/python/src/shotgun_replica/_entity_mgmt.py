@@ -19,10 +19,10 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
     baseclass for shotgun-entities
     """
     
-    # remote ID is the id that is used by shotgun
+    ## remote ID is the id that is used by shotgun
     remote_id = None
     
-    # local ID is the id that is used locally by the database
+    ## local ID is the id that is used locally by the database
     local_id = None
 
     _changed_values = []

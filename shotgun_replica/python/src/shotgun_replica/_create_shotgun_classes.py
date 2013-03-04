@@ -24,8 +24,8 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
     fieldDefCode = "%s = %s\n\n" % ( entityname,
                                      newCode )
     
-    fieldsstring = "    shotgun_fields = %s.%s" % ( FIELDDEFINITIONSMODULE, 
-                                                    entityname )
+    fieldsstring = "    # shotgun field definitions\n    shotgun_fields = %s.%s" % ( FIELDDEFINITIONSMODULE, 
+                                                                                     entityname )
     classString = """class %s(_ShotgunEntity):
     \"\"\"
     internal shotgun name: %s
@@ -33,8 +33,7 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
     \"\"\"
     
     _type = "%s"
-    remote_id = None
-    local_id = None
+
 %s
 
 """ % ( entityname, entitycode, entities[entitycode]["name"]["value"], entitycode, fieldsstring )
@@ -63,7 +62,11 @@ def _createClassCode( entities, entitycode, fieldDefs, entityname ):
             "uuid",
             "color",
             "serializable"]:
-            classString += "    %s = None\n" % field
+            doc = fieldDefs[field]["description"]["value"]
+            if doc != "":
+                classString += "    # %s\n    %s = None\n" % ( doc, field, )
+            else:
+                classString += "    # undocumented field\n    %s = None\n" % ( field, )
         elif fieldDefs[field]["data_type"]["value"] in ["pivot_column",
             "password",
             "summary",

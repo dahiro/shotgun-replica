@@ -9,6 +9,7 @@ import time
 import sys
 import traceback
 import pprint
+import threading
 
 TEMPORARY = 0
 PARANOID = 2
@@ -34,6 +35,7 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
 
         timestring = time.strftime( "%Y/%m/%d %H:%M:%S", time.localtime() )
         timestring = timestring + ( "%.3f " % ( time.time() % 1 ) )[1:]
+        timestring = timestring + " (%s) " % threading.currentThread().name
         timestring = timestring + ": " + IDS[messagelevel][0]
         if prefix:
             timestring = timestring + " %s: " % prefix
@@ -53,9 +55,18 @@ def debug( message, messagelevel = DEBUG, nolinebreak = False, prefix = None ):
 
         if isParanoiing():
             stack = traceback.extract_stack()
-            toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 4][0],
-                                                             stack[len( stack ) - 4][1],
-                                                             stack[len( stack ) - 4][2] )
+            if len( stack ) > 5:
+                toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 6][0],
+                                                                 stack[len( stack ) - 6][1],
+                                                                 stack[len( stack ) - 6][2] )
+            if len( stack ) > 4:
+                toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 5][0],
+                                                                 stack[len( stack ) - 5][1],
+                                                                 stack[len( stack ) - 5][2] )
+            if len( stack ) > 3:
+                toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 4][0],
+                                                                 stack[len( stack ) - 4][1],
+                                                                 stack[len( stack ) - 4][2] )
             toprint += "  File \"%s\", line %d, in %s\n" % ( stack[len( stack ) - 3][0],
                                                              stack[len( stack ) - 3][1],
                                                              stack[len( stack ) - 3][2] )

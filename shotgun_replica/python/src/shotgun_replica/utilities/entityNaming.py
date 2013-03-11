@@ -23,9 +23,6 @@ def getConnectionEntityName( entityType, attribute ):
         else:
             entityName = "%s_%s_Connection" % ( entityType, attribute )
 
-    debug.debug( ( entityType, attribute ) )
-    debug.debug( ( entityName, attributeName ) )
-
     if shotgun_replica.entities.__dict__.has_key( entityName ):
         return entityName
     else:

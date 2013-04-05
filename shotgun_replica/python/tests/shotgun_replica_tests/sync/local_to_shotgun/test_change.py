@@ -24,8 +24,8 @@ class Test( unittest.TestCase ):
         self.testproject = getObject( Project().getType(), remote_id = testProjectID )
         self.eventprocessor = LocalDBEventSpooler()
         self.sg = shotgun.Shotgun( config.SHOTGUN_URL,
-                                   config.SHOTGUN_BACKSYNC_SKRIPT,
-                                   config.SHOTGUN_BACKSYNC_KEY )
+                                   config.SHOTGUN_SYNC_SKRIPT,
+                                   config.SHOTGUN_SYNC_KEY )
         self.shotgun2local = shotgun_to_local.EventSpooler()
 
     def tearDown( self ):

@@ -16,8 +16,8 @@ import shutil
 def getUrlAndStoreLocally( entity_type, entity_id, attribute_name ):
 
     sg = shotgun_api3.Shotgun( srconfig.SHOTGUN_URL,
-                               srconfig.SHOTGUN_BACKSYNC_SKRIPT,
-                               srconfig.SHOTGUN_BACKSYNC_KEY )
+                               srconfig.SHOTGUN_SYNC_SKRIPT,
+                               srconfig.SHOTGUN_SYNC_KEY )
     val = sg.find_one( entity_type,
                        filters = [['id', 'is', entity_id]],
                        fields = [attribute_name] )

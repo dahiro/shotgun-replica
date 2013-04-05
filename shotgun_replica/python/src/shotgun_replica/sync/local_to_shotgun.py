@@ -50,8 +50,8 @@ class LocalDBEventSpooler( object ):
 
         try:
             self.sg = shotgun_api3.Shotgun( config.SHOTGUN_URL,
-                                            config.SHOTGUN_BACKSYNC_SKRIPT,
-                                            config.SHOTGUN_BACKSYNC_KEY )
+                                            config.SHOTGUN_SYNC_SKRIPT,
+                                            config.SHOTGUN_SYNC_KEY )
         except Exception, error: #IGNORE:W0703
             debug.error( "Unable to _connect to Shotgun server. " + unicode( error ) )
             return False

@@ -10,10 +10,6 @@ SHOTGUN_URL = eleconfig.get( config.CONF_SHOTGUN_URL )
 SHOTGUN_SYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_SYNC_SKRIPT )
 SHOTGUN_SYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_SYNC_KEY )
 
-# shotgun-script that does not generate events
-SHOTGUN_BACKSYNC_SKRIPT = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_SKRIPT )
-SHOTGUN_BACKSYNC_KEY = eleconfig.get( config.CONF_SHOTGUN_BACKSYNC_KEY )
-
 # folder to store thumbnails locally
 SHOTGUN_LOCAL_THUMBFOLDER = eleconfig.get( config.CONF_SHOTGUN_THUMBFOLDER )
 
@@ -35,3 +31,11 @@ def getUserDict():
     """
     return {"type": "HumanUser",
             "id": eleconfig.get( "shotgun_userid" )}
+
+def getScriptDict():
+    """
+    get dict representing the api access
+    """
+    syncScript = config.getScript()
+    return {"type": "ApiUser",
+            "id": syncScript.getRemoteID() }

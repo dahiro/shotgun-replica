@@ -15,8 +15,8 @@ def _connect():
 
     cur = conn.cursor()
     sg = Shotgun( conf.get( config.CONF_SHOTGUN_URL ),
-                  conf.get( config.CONF_SHOTGUN_SKRIPT ),
-                  conf.get( config.CONF_SHOTGUN_KEY ) )
+                  conf.get( config.CONF_SHOTGUN_SYNC_SKRIPT ),
+                  conf.get( config.CONF_SHOTGUN_SYNC_KEY ) )
 
     return ( conn, cur, sg )
 

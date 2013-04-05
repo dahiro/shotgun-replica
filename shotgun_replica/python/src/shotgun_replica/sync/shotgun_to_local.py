@@ -15,6 +15,7 @@ import shotgun_api3
 
 import re
 from shotgun_replica.sync import sync_settings
+import traceback
 
 COUCHDB_FAILURE = 1
 SHOTGUN_FAILURE = 2
@@ -39,8 +40,8 @@ class EventSpooler( object ):
 
         try:
             self.sg = shotgun_api3.Shotgun( config.SHOTGUN_URL,
-                                            config.SHOTGUN_BACKSYNC_SKRIPT,
-                                            config.SHOTGUN_BACKSYNC_KEY )
+                                            config.SHOTGUN_SYNC_SKRIPT,
+                                            config.SHOTGUN_SYNC_KEY )
         except Exception, error: #IGNORE:W0703
             debug.debug( "Unable to _connect to Shotgun server. " + unicode( error ), debug.ERROR )
             return False
@@ -68,7 +69,9 @@ class EventSpooler( object ):
             try:
                 eventliste = self.sg.find( 
                                 "EventLogEntry",
-                                filters = [['id', 'greater_than', current]],
+                                filters = [['id', 'greater_than', current],
+                                           ],
+#                                           ['user', 'is_not', config.getScriptDict() ]],
                                 fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity'],
                                 order = [{'column':'id', 'direction':'asc'}],
                                 filter_operator = 'all',
@@ -76,7 +79,7 @@ class EventSpooler( object ):
 
             except Exception, error: #IGNORE:W0703
                 debug.debug( "Exception retrieving Events from Shotgun: ", debug.ERROR )
-                debug.debug( error, debug.ERROR )
+                debug.debug( traceback.format_exc(), debug.ERROR )
                 eventliste = []
                 return False
 

@@ -11,10 +11,15 @@ from shotgun_replica.utilities import debug, entityNaming
 from shotgun_replica.connectors import getPgObj
 
 CREATED_CHANGE_EVENTS = []
+GENERATEEVENTS = True
 
 def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
     global CREATED_CHANGE_EVENTS
+    global GENERATEEVENTS
+    
+    if not GENERATEEVENTS:
+        return
 
     updated_by = connectors.getPostgresUser()
 
@@ -43,6 +48,10 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
     CREATED_CHANGE_EVENTS.append( eventid )
 
     src.con.commit()
+
+def setGenerateChangeEvents( dogenerate = True ):
+    global GENERATEEVENTS
+    GENERATEEVENTS = dogenerate
 
 def removeCreatedChangeEvents():
     """

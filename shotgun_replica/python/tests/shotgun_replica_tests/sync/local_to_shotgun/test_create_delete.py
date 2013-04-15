@@ -41,7 +41,7 @@ class Test( unittest.TestCase ):
         shot.project = self.testproject
         shot.save()
         newshotid = shot.getLocalID()
-        self.assertTrue( shot.getLocalID() != None )
+        self.assertTrue( newshotid != None and newshotid != shotgun_replica.UNKNOWN_SHOTGUN_ID )
 
         shot_ret = getObject( "Shot", local_id = newshotid )
         self.assertTrue( shot_ret != None )

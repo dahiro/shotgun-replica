@@ -17,6 +17,7 @@ from shotgun_api3 import shotgun
 import unittest
 import uuid
 from shotgun_replica.sync import shotgun_to_local
+import shotgun_replica
 
 class Test( unittest.TestCase ):
 
@@ -44,7 +45,7 @@ class Test( unittest.TestCase ):
 
         newRemoteID = shot_ret.getRemoteID()
 
-        self.assertTrue( newRemoteID != None )
+        self.assertTrue( newRemoteID != None and newRemoteID != shotgun_replica.UNKNOWN_SHOTGUN_ID )
 
         newCutIn = 1234
         shot_ret.sg_cut_in = newCutIn

@@ -17,8 +17,9 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
     global CREATED_CHANGE_EVENTS
     global GENERATEEVENTS
-    
+
     if not GENERATEEVENTS:
+        debug.debug( "not generating change event ( for testing purposes only )" )
         return
 
     updated_by = connectors.getPostgresUser()
@@ -51,6 +52,14 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
 def setGenerateChangeEvents( dogenerate = True ):
     global GENERATEEVENTS
+    if dogenerate:
+        message = "enabling "
+    else:
+        message = "disabling "
+
+    message += "generation of change events"
+
+    debug.info( message )
     GENERATEEVENTS = dogenerate
 
 def removeCreatedChangeEvents():
@@ -64,9 +73,9 @@ def removeCreatedChangeEvents():
 
     src = connectors.DatabaseModificator()
     cur = src.con.cursor()
-    cur.execute( "DELETE FROM \"ChangeEventsToShotgun\" WHERE id = ANY(%s) AND task != %s", ( CREATED_CHANGE_EVENTS, 
+    cur.execute( "DELETE FROM \"ChangeEventsToShotgun\" WHERE id = ANY(%s) AND task != %s", ( CREATED_CHANGE_EVENTS,
                                                                                               "deletion", ) )
-    
+
     CREATED_CHANGE_EVENTS = []
 
 

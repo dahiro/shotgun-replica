@@ -93,6 +93,7 @@ class LocalDBEventSpooler( object ):
 
             stateOk = self._processChangeEvent( eventDict )
             if not stateOk:
+                debug.debug( "event %d not synced OK" % eventDict["id"] )
                 allOk = False
 
         return allOk

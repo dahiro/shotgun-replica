@@ -52,9 +52,12 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
 def setGenerateChangeEvents( dogenerate = True ):
     global GENERATEEVENTS
+    global CREATED_CHANGE_EVENTS
+    
     if dogenerate:
         message = "enabling "
     else:
+        CREATED_CHANGE_EVENTS = []
         message = "disabling "
 
     message += "generation of change events"

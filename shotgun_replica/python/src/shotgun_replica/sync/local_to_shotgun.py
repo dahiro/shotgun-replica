@@ -242,7 +242,16 @@ class LocalDBEventSpooler( object ):
                                                                                        entity.local_id )
                     self._setProcessed( event, exception = exception )
                     return False
-
+                
+                remoteID = obj.getRemoteID()
+                if remoteID != None and remoteID != UNKNOWN_SHOTGUN_ID:
+                    exception = ( "Error %s with local_id %d seems to be existing already.\n" + \
+                                  "This is most probably due to concurrent syncing of tests and sync-daemon? " 
+                                  ) % ( entity.type,
+                                        entity.local_id )
+                    self._setProcessed( event, exception = exception )
+                    return True
+                
                 data = obj.getShotgunDict()
 
                 debug.debug( data )

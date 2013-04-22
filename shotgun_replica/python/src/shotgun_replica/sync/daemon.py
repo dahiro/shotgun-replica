@@ -14,6 +14,7 @@ import os
 import socket
 
 OTHER_SYNCDAMEON_RUNNING = -1
+SYNC_DAEMON_SHOULD_SLEEP = 100
 SYNCED_OK = 0
 SYNCED_NOT_OK = 1
 
@@ -32,17 +33,26 @@ class SyncDaemon( object ):
         self.syncomaniaSettings[sync_settings.FIELD_CURRENT_SYNCDAEMON_ID] = self.mycode
         self.syncomaniaSettings.save()
 
-    def _generateCode(self):
+    def _generateCode( self ):
         code = "%s: %s" % ( socket.gethostname(), uuid.uuid1() )
         return code
-        
-    def run( self ):
 
+    def run( self ):
+        sleeped = False
         while True:
 
             retcode = self.connectAndRun()
             if retcode == OTHER_SYNCDAMEON_RUNNING:
                 break
+            if retcode == SYNC_DAEMON_SHOULD_SLEEP:
+                if not sleeped:
+                    debug.info( "\nsync daemon went to sleep mode" )
+                sleeped = True
+                time.sleep( 10 )
+            else:
+                if sleeped:
+                    debug.info( "\nsync daemon quit sleep mode" )
+                sleeped = False
             sys.stdout.write( "." )
             time.sleep( 2 )
 
@@ -52,6 +62,10 @@ class SyncDaemon( object ):
             debug.error( "another daemon seems to have started running" )
             return OTHER_SYNCDAMEON_RUNNING
 
+        # while testing sync daemon goes into sleep mode
+        if self.syncomaniaSettings.get( sync_settings.FIELD_SYNC_SLEEP ) == sync_settings.FIELD_SYNC_SLEEP_YES:
+            return SYNC_DAEMON_SHOULD_SLEEP
+
         state_Shotgun_to_Local = self.shotgun_to_local_spooler.connectAndRun()
         if not state_Shotgun_to_Local:
             debug.debug( "something not OK syncing Shotgun to Local", debug.ERROR )
@@ -59,7 +73,7 @@ class SyncDaemon( object ):
         state_Local_to_Shotgun = self.local_to_shotgun_spooler.connectAndRun( onlyEventIDs = onlyEventIDs )
         if not state_Local_to_Shotgun:
             debug.debug( "something not OK syncing Local to Shotgun", debug.ERROR )
-        
+
         if not state_Shotgun_to_Local or not state_Local_to_Shotgun:
             return SYNCED_NOT_OK
         else:

@@ -10,21 +10,22 @@ from shotgun_replica import connectors, config, cleanSysName
 
 import os
 from shotgun_replica.utilities import debug
+import psycopg2
 
 FIELDDEFINITIONSMODULE = "_fieldDefinitions"
 
 def _createClassCode( entities, entitycode, fieldDefs, entityname ):
     classCode = ""
 
-    indent = len(entityname) + 3
+    indent = len( entityname ) + 3
 
-    fieldDefinitions = pformat( fieldDefs, indent = 4, width = 80 ).split("\n")
+    fieldDefinitions = pformat( fieldDefs, indent = 4, width = 80 ).split( "\n" )
     newCode = "\n".join( [ ( " " * indent ) + line for line in fieldDefinitions ] )[indent:]
 
     fieldDefCode = "%s = %s\n\n" % ( entityname,
                                      newCode )
-    
-    fieldsstring = "    # shotgun field definitions\n    shotgun_fields = %s.%s" % ( FIELDDEFINITIONSMODULE, 
+
+    fieldsstring = "    # shotgun field definitions\n    shotgun_fields = %s.%s" % ( FIELDDEFINITIONSMODULE,
                                                                                      entityname )
     classString = """class %s(_ShotgunEntity):
     \"\"\"
@@ -120,7 +121,18 @@ def _getDBFields( entityType, entityName ):
                                               fieldstr )
         debug.debug( query )
         createCur.execute( query )
-    
+
+    for column in [ "__retired", "id", "__local_id", "sg_link" ]:
+
+        query = "CREATE INDEX %s ON \"%s\" (\"%s\")" % ( "%s_%s_idx" % ( entityType.lower(), column.lower() ),
+                                                         entityType,
+                                                         column )
+        try:
+            debug.debug( query )
+            createCur.execute( query )
+        except psycopg2.ProgrammingError:
+            debug.debug( "%s of %s does not exist or index already available" % ( column, entityType ) )
+
     if entityName != entityType:
         query = "COMMENT ON TABLE \"%s\" IS 'Entity name: %s'" % ( entityType, entityName );
     else:
@@ -140,7 +152,7 @@ def _createDBFields( entitycode, fieldDefs, entityname ):
     createCur = conn.cursor()
 
     dbFields = _getDBFields( entitycode, entityname )
-    if not dbFields.has_key("__retired"):
+    if not dbFields.has_key( "__retired" ):
         query = "ALTER TABLE \"%s\" ADD COLUMN \"__retired\" BOOLEAN DEFAULT 'f'" % entitycode
         createCur.execute( query )
 

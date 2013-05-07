@@ -8,6 +8,7 @@ from shotgun_replica import connectors, base_entity, UNKNOWN_SHOTGUN_ID
 import os
 import json
 from shotgun_replica.utilities import debug, entityNaming
+import re
 
 
 def getObject( entityType, local_id = None, remote_id = None, includeRetireds = False ):
@@ -125,3 +126,19 @@ def getConnectionObj( baseObj, linkedObj, attribute ):
         elif len( objs ) > 1:
             return objs
     return None
+
+IDENTIFY_REGEX = r"\(\'([a-zA-Z0-9\-\_]+)\'\,(\-?\d+)\,(\-?\d+)\)"
+
+def getObjectByIdentifier( identifier ):
+    ## return object by its identifier
+    # 
+    # @param identifier: string à la "('CustomEntity24,-1,239)"
+    # @return: object if available/found or None if not
+     
+    identObject = None
+    mObj = re.match( IDENTIFY_REGEX, identifier )
+    if mObj:
+        identObject = getObject( mObj.group( 1 ),
+                                 local_id = int( mObj.group( 2 ) ),
+                                 remote_id = int( mObj.group( 3 ) ) )
+    return identObject

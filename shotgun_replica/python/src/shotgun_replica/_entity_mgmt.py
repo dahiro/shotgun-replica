@@ -79,6 +79,11 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
         return "%s_%d" % ( self.getType(),
                            self.getLocalID() )
 
+    def getIdentifier(self):
+        return "('%s',%d,%d)" % ( self.getType(),
+                                  self.getLocalID(),
+                                  self.getRemoteID() )
+
     def getSgObj( self ):
         """
         get minimal dict for use with shotgun (jsonable) 

@@ -357,7 +357,7 @@ class EventProcessor( object ):
 
             ( srcAttrName, dstAttrName ) = entityNaming.getConnectionEntityAttrName( entityType, linkedEntityType, self.obj_type )
 
-            filters = "%s=%s and %s=%s" % ( srcAttrName,
+            filters = "\"%s\"=%s and \"%s\"=%s" % ( srcAttrName,
                                             "%s",
                                             dstAttrName,
                                             "%s"

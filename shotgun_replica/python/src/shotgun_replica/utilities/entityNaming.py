@@ -37,6 +37,8 @@ def getConnectionEntityAttrName( baseEntityType, linkedEntityType, connEntityNam
     debug.debug( ( baseAttrName, linkedAttrName ) )
 
     if baseAttrName != linkedAttrName:
+        if linkedAttrName == "human_user":
+            linkedAttrName = "user"
         return ( baseAttrName, linkedAttrName )
     else:
         theclass = connectors.getClassOfType( connEntityName )

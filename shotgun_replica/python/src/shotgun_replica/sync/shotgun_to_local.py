@@ -36,6 +36,7 @@ class EventSpooler( object ):
             self.src = connectors.DatabaseModificator()
         except Exception, error: #IGNORE:W0703
             debug.debug( "Unable to _connect to couchdb server. " + unicode( error ), debug.ERROR )
+            debug.debug( traceback.format_exc(), debug.ERROR )
             return False
 
         try:
@@ -44,6 +45,7 @@ class EventSpooler( object ):
                                             config.SHOTGUN_SYNC_KEY )
         except Exception, error: #IGNORE:W0703
             debug.debug( "Unable to _connect to Shotgun server. " + unicode( error ), debug.ERROR )
+            debug.debug( traceback.format_exc(), debug.ERROR )
             return False
 
         self.data = SyncomaniaSettings()
@@ -52,6 +54,7 @@ class EventSpooler( object ):
 
         except Exception, error: #IGNORE:W0703
             debug.debug( "no syncomania data available yet: " + unicode( error ), debug.ERROR )
+            debug.debug( traceback.format_exc(), debug.ERROR )
             return False
 
         # everything is ok

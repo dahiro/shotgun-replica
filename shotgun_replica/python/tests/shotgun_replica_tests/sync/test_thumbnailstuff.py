@@ -8,12 +8,13 @@ from shotgun_replica import factories, entities, thumbnails
 import os
 from shotgun_replica.utilities import debug
 import time
+from shotgun_replica_tests import testNodeID_1
 
 class Test( unittest.TestCase ):
 
     def setUp( self ):
         self.testnode = factories.getObject( entities.Node._type,
-                                             remote_id = 1 )
+                                             remote_id = testNodeID_1 )
 
     def tearDown( self ):
         pass

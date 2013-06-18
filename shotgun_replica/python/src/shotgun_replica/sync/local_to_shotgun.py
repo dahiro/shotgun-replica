@@ -204,7 +204,7 @@ class LocalDBEventSpooler( object ):
                     if type( value ) == float:
                         data[attribute] = int( value * 60 )
 
-            if fieldDefs.has_key( "sg_remotely_updated_by" ):
+            if fieldDefs.has_key( "sg_remotely_updated_by" ) and event["updated_by"] != None:
                 data["sg_remotely_updated_by"] = event["updated_by"].getSgObj()
 
             try:

@@ -24,8 +24,12 @@ def _createChangeEvent( src, task, corr_entity = None, changed_values = None ):
 
     updated_by = connectors.getPostgresUser()
 
-    names = ["task", "updated_by"]
-    values = [task, updated_by]
+    names = ["task"]
+    values = [task]
+    
+    if updated_by != None:
+        names.append( "updated_by" )
+        values.append( updated_by )
 
     if corr_entity != None:
         names.append( "corr_entity" )

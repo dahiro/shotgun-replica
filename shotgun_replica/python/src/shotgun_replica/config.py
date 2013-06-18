@@ -29,8 +29,13 @@ def getUserDict():
     """ function that returns a dict describing 
     the user changes should be stored as
     """
-    return {"type": "HumanUser",
-            "id": eleconfig.get( "shotgun_userid" )}
+    
+    shotgun_userid = eleconfig.get( "shotgun_userid" )
+    if shotgun_userid == None:
+        return None
+    else:
+        return {"type": "HumanUser",
+                "id": shotgun_userid }
 
 def getScriptDict():
     """

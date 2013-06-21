@@ -184,7 +184,10 @@ class LocalDBEventSpooler( object ):
             for attribute in data.keys():
                 dataType = fieldDefs[attribute]["data_type"]["value"]
                 value = data[attribute]
-
+                
+                if value == None:
+                    continue
+                
                 if dataType == "float":
                     data[attribute] = float( value )
                 elif dataType == "entity":

@@ -8,7 +8,7 @@ Created on Jun 27, 2012
 from shotgun_replica.factories import getObject
 from shotgun_replica.sync.local_to_shotgun import LocalDBEventSpooler
 from shotgun_replica.entities import Project, Shot
-from shotgun_replica import config
+from shotgun_replica import config, factories, entities
 
 from tests_elefant import testProjectID
 
@@ -18,6 +18,7 @@ import unittest
 import uuid
 from shotgun_replica.sync import shotgun_to_local
 import shotgun_replica
+from shotgun_replica_tests import testShotID
 
 class Test( unittest.TestCase ):
 
@@ -28,9 +29,17 @@ class Test( unittest.TestCase ):
                                    config.SHOTGUN_SYNC_SKRIPT,
                                    config.SHOTGUN_SYNC_KEY )
         self.shotgun2local = shotgun_to_local.EventSpooler()
+        
+        self.testshot = factories.getObject( entities.Shot, 
+                                             remote_id = testShotID )
+        self.current_cut_in = self.testshot.sg_cut_in
 
     def tearDown( self ):
+
+        self.testshot.sg_cut_in = self.current_cut_in
+        self.testshot.save()
         self.assertTrue( self.shotgun2local.connectAndRun(), "synch not successful" )
+
 
     def test_create( self ):
 
@@ -79,3 +88,14 @@ class Test( unittest.TestCase ):
                                )
         self.assertEqual( len( newshot ), 0 )
 
+
+    def test_change_Nones( self ):
+        
+        self.testshot.sg_cut_in = None
+        self.testshot.save()
+
+        self.assertTrue( self.eventprocessor.connectAndRun(), "synch not successful" )
+        
+        newshot = factories.getObject( entities.Shot, 
+                                       remote_id = testShotID )
+        self.assertEqual( newshot.sg_cut_in, None )

@@ -31,6 +31,7 @@ class Test( unittest.TestCase ):
 
     def test_retrieval_complex( self ):
         oldurl = self.testnode.image
+        oldurl = oldurl.replace("/files_api/", "/files/" )
         newurl = thumbnails.getUrlAndStoreLocally( self.testnode.getType(),
                                                    self.testnode.getRemoteID(),
                                                    "image" )

@@ -10,6 +10,7 @@ import json
 from shotgun_replica import connectors, factories
 import urlparse
 import sys
+import datetime
 
 def intOrNone( value ):
     if value == None or value == "-1":
@@ -160,6 +161,7 @@ def updateEntity( entity, dataDict ):
 
 def createEntity( entityClass, dataDict ):
     entity = entityClass()
+    entity.created_at = datetime.datetime.now()
     return updateEntity( entity, dataDict )
 
 def startServer():

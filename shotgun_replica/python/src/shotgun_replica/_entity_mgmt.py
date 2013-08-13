@@ -369,6 +369,7 @@ class _ShotgunEntity( base_entity.ShotgunBaseEntity ):
             if self.getLocalID() == None or self.getLocalID() == shotgun_replica.UNKNOWN_SHOTGUN_ID:
                 # insert entity in local database
                 entity_manipulation.createEntity( self )
+                self._changed_values = []
             else:
                 changes = {}
                 for attribute_name in self._changed_values:

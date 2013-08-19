@@ -25,8 +25,8 @@ def getUrlAndStoreLocally( entity_type, entity_id, attribute_name ):
 
     if imageUrl != None:
         saveShotgunImageLocally( imageUrl )
-
-    return imageUrl
+        
+    return imageUrl.split("?")[0]
 
 def __getPathFromImageUrl( url ):
     """return path from image url"""
@@ -35,6 +35,8 @@ def __getPathFromImageUrl( url ):
     pathElements = url.split( "/" )
     server = pathElements[0]
     filename = pathElements[len( pathElements ) - 1]
+    filename = filename.split( "?" )[0]
+
     path = os.sep.join( pathElements[1:( len( pathElements ) - 1 )] )
     return [path, filename]
 
@@ -52,7 +54,7 @@ def createTestThumbnailPath( srcImage ):
     url = config.Configuration().get( config.CONF_SHOTGUN_URL )
     url += "/files/testfiles/" + str( uuid.uuid1() ) + "/"
     url += os.path.basename( srcImage )
-    
+
     localPath = getLocalThumbPath( url )
     shutil.copy( srcImage, localPath )
 

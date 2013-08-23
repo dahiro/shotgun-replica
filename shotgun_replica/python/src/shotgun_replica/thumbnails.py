@@ -44,7 +44,9 @@ def __getAbsShotgunImagePath( path, filename ):
     """get shotgun image path locally"""
     thepath = os.path.join( srconfig.SHOTGUN_LOCAL_THUMBFOLDER, path )
     if not ( os.path.isdir( thepath ) ):
-        os.makedirs( thepath )
+        oldumask = os.umask(0o002)
+        os.makedirs( thepath, 0o775 )
+        os.umask(oldumask)
     return os.path.join( thepath, filename )
 
 def createTestThumbnailPath( srcImage ):
@@ -81,8 +83,10 @@ def saveShotgunImageLocally( url ):
 
     savedAt = __getAbsShotgunImagePath( path, filename )
     debug.debug( savedAt )
+    oldumask = os.umask( 0o002 )
     imagefile = open( savedAt, "w" )
     imagefile.write( content )
     imagefile.close()
+    os.umask( oldumask )
 
     return savedAt

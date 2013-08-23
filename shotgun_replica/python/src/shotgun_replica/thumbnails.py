@@ -88,5 +88,6 @@ def saveShotgunImageLocally( url ):
     imagefile.write( content )
     imagefile.close()
     os.umask( oldumask )
+    os.chmod( savedAt, 0o664 )
 
     return savedAt

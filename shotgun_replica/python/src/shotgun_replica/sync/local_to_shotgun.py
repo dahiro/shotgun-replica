@@ -198,14 +198,14 @@ class LocalDBEventSpooler( object ):
                         newvalue.append( getSgObj( sgObj ) )
                     data[attribute] = newvalue
                 elif dataType == "date_time":
-                    if type( value ) == type( u"" ):
+                    if type( value ) == unicode or type( value ) == str :
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d %H:%M:%S" )
                     if value.tzinfo == None:
                         from pytz import timezone
                         zurich = timezone( "Europe/Zurich" )
                         value = zurich.localize( value )
                 elif dataType == "date":
-                    if type( value ) == type( u"" ):
+                    if type( value ) == unicode or type( value ) == str :
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d" ).date()
                 elif dataType == "duration":
                     if type( value ) == float:

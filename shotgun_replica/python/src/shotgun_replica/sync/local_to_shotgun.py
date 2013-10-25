@@ -72,11 +72,11 @@ class LocalDBEventSpooler( object ):
         if onlyEventIDs != None:
             query += " AND id = ANY(%s)"
             query += " ORDER BY created ASC, id ASC"
-            self.cur.execute( query, (onlyEventIDs, ) )
+            self.cur.execute( query, ( onlyEventIDs, ) )
         else:
             query += " ORDER BY created ASC, id ASC"
             self.cur.execute( query )
-            
+
         descriptions = self.cur.description
         allOk = True
         for result in self.cur:
@@ -184,10 +184,10 @@ class LocalDBEventSpooler( object ):
             for attribute in data.keys():
                 dataType = fieldDefs[attribute]["data_type"]["value"]
                 value = data[attribute]
-                
+
                 if value == None:
                     continue
-                
+
                 if dataType == "float":
                     data[attribute] = float( value )
                 elif dataType == "entity":
@@ -200,6 +200,10 @@ class LocalDBEventSpooler( object ):
                 elif dataType == "date_time":
                     if type( value ) == type( u"" ):
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d %H:%M:%S" )
+                    if value.tzinfo == None:
+                        from pytz import timezone
+                        zurich = timezone( "Europe/Zurich" )
+                        value = zurich.localize( value )
                 elif dataType == "date":
                     if type( value ) == type( u"" ):
                         data[attribute] = datetime.datetime.strptime( value, "%Y-%m-%d" ).date()
@@ -219,7 +223,7 @@ class LocalDBEventSpooler( object ):
                         # Connection-Entities need first the corresponding remote-id
                         # they get that by the shotgun-event triggered by the event that causes this connection-entity to be created
                         # so we simply have to wait and do nothing (hopefully ;)
-                        debug.info( "waiting for a connection-entitiy to appear %s" % ( str( entityObj ),  ) )
+                        debug.info( "waiting for a connection-entitiy to appear %s" % ( str( entityObj ), ) )
                         return True
 
                 self.sg.update( entityObj.getType(), entityObj.getRemoteID(), data )
@@ -245,16 +249,16 @@ class LocalDBEventSpooler( object ):
                                                                                        entity.local_id )
                     self._setProcessed( event, exception = exception )
                     return False
-                
+
                 remoteID = obj.getRemoteID()
                 if remoteID != None and remoteID != UNKNOWN_SHOTGUN_ID:
                     exception = ( "Error %s with local_id %d seems to be existing already.\n" + \
-                                  "This is most probably due to concurrent syncing of tests and sync-daemon? " 
+                                  "This is most probably due to concurrent syncing of tests and sync-daemon? "
                                   ) % ( entity.type,
                                         entity.local_id )
                     self._setProcessed( event, exception = exception )
                     return True
-                
+
                 data = obj.getShotgunDict()
 
                 debug.debug( data )
